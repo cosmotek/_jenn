@@ -2,23 +2,20 @@ name: shakenNotStirred
 types:
 - name: user
   fields:
-  - name: id
-    typeof:
-      sqltypename: UUID PRIMARY KEY
-      grpctypename: string
   - name: firstName
-    typeof:
-      sqltypename: VARCHAR(64) NOT NULL
-      grpctypename: string
+    typeof: name
+    selector: true
+    optional: false
   - name: lastName
-    typeof:
-      sqltypename: VARCHAR(64) NOT NULL
-      grpctypename: string
-  - name: username
-    typeof:
-      sqltypename: VARCHAR(128) NOT NULL
-      grpctypename: string
+    typeof: string
+    selector: false
+    optional: false
   - name: phoneNumber
-    typeof:
-      sqltypename: VARCHAR(10) NOT NULL
-      grpctypename: string
+    typeof: phoneNumber
+    selector: false
+    optional: false
+  - name: joinedAt
+    typeof: datetime
+    selector: false
+    optional: false
+

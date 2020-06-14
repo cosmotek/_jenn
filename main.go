@@ -14,13 +14,43 @@ func main() {
 		panic(err)
 	}
 
-	protoStr, err := templates.ToStr(model, string(templates.MessageTemplate))
+	protoStr, err := templates.ToStr(model, string(templates.PostgresTableCreationTemplate))
 	if err != nil {
 		panic(err)
 	}
 
-	err = ioutil.WriteFile("out/shakenNotStirred.proto", []byte(protoStr), os.ModePerm)
+	err = ioutil.WriteFile("out/provision.sql", []byte(protoStr), os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
+
+	// model := ir.ModelIR{
+	// 	Name: "shakenNotStirred",
+	// 	Types: []ir.Structure{
+	// 		{
+	// 			Name: "user",
+	// 			Fields: []ir.Field{
+	// 				{
+	// 					Name:   "firstName",
+	// 					TypeOf: types.Name,
+	// 				},
+	// 				{
+	// 					Name:   "lastName",
+	// 					TypeOf: types.Name,
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	// file, err := os.Create("ir/examples/shakenNotStirred.yaml")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer file.Close()
+
+	// err = yaml.NewEncoder(file).Encode(model)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
