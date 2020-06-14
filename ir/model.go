@@ -10,22 +10,38 @@ import (
 )
 
 type Structure struct {
-	Name   string
+	Name        string
+	Description string
+
 	Fields []Field
+}
+
+type FormAssignment struct {
+	TypeName  string
+	FieldName string
+}
+
+type Form struct {
+	Name   string
+	Fields map[FormAssignment]Field
 }
 
 type ModelIR struct {
 	Name  string
 	Types []Structure
+	Forms []Form
 }
 
 type Field struct {
-	Name      string
+	Name        string
+	Description string
+
 	TypeOf    irTypes.CanonicalName
 	Primitive types.Primitive `yaml:"-"`
 
-	Selector bool
-	Optional bool
+	Selector     bool
+	Optional     bool
+	DefaultValue interface{}
 }
 
 func FromFile(filename string) (ModelIR, error) {

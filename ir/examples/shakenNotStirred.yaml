@@ -1,21 +1,56 @@
 name: shakenNotStirred
 types:
 - name: user
+  description: ""
   fields:
   - name: firstName
+    description: ""
     typeof: name
-    selector: true
+    selector: false
     optional: false
+    defaultvalue: null
   - name: lastName
-    typeof: string
+    description: ""
+    typeof: name
     selector: false
     optional: false
-  - name: phoneNumber
-    typeof: phoneNumber
-    selector: false
-    optional: false
+    defaultvalue: null
   - name: joinedAt
+    description: ""
     typeof: datetime
     selector: false
     optional: false
-
+    defaultvalue: null
+  - name: phoneNumber
+    description: ""
+    typeof: phoneNumber
+    selector: false
+    optional: false
+    defaultvalue: null
+forms:
+- name: ""
+  fields:
+    ? typename: user
+      fieldname: firstName
+    : name: firstName
+      description: ""
+      typeof: name
+      selector: false
+      optional: false
+      defaultvalue: null
+    ? typename: user
+      fieldname: lastName
+    : name: lastName
+      description: ""
+      typeof: name
+      selector: false
+      optional: false
+      defaultvalue: null
+    ? typename: user
+      fieldname: phoneNumber
+    : name: phoneNumber
+      description: ""
+      typeof: name
+      selector: false
+      optional: false
+      defaultvalue: null
