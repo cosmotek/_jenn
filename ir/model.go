@@ -27,7 +27,9 @@ type Form struct {
 }
 
 type ModelIR struct {
-	Name  string
+	Name                     string
+	EnableUniversalArchiving bool
+
 	Types []Structure
 	Forms []Form
 }

@@ -1,8 +1,13 @@
 package templates
 
 const PostgresTableCreationTemplate = `
-{{- range $j, $t := .Types }}
+{{- $root := . }}
+{{- range $j, $t := $root.Types }}
 CREATE TABLE {{ $t.Name | quotes }} (
+	"id" UUID PRIMARY KEY,
+	{{- if $root.EnableUniversalArchiving }}
+	"_archived" BOOLEAN NOT NULL DEFAULT FALSE,
+	{{- end }}
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
 	{{ $e.Name | quotes }} {{ $e.Primitive.SQLType }}{{ if last $i $f }}{{ else }},{{ end }}
