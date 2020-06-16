@@ -1,6 +1,3 @@
-package templates
-
-const PostgresTableCreationTemplate = `
 {{- $root := . }}
 {{- range $j, $t := $root.Types }}
 CREATE TABLE {{ $t.Name | quotes }} (
@@ -24,4 +21,3 @@ USING gin ({{ $e.Name | quotes }} gin_trgm_ops);
 {{- end }}
 {{- end }}
 {{- end }}
-`

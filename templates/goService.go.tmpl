@@ -1,0 +1,67 @@
+package main
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type ServiceInstance struct{
+	DB string
+}
+{{- "\n" }}
+{{- $root := . }}
+{{- range $j, $t := $root.Types }}
+type {{ $t.Name | title }} {
+	ID uuid.UUID
+	{{- if $root.EnableUniversalArchiving }}
+	Archived bool
+	{{- end }}
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{ $e.Name | title }} {{ $e.Primitive.GoType }}
+	{{- end }}
+}
+
+const {{ $t.Name }}CreateQueryStr = `
+INSERT INTO {{ $t.Name }} (
+	{{- if $root.EnableUniversalArchiving }}
+	_archived,
+	{{- end }}
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{ $e.Name | quotes }}{{ if last $i $f }}{{ else }},{{ end }}
+	{{- end }}
+) VALUES (
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{ "$" }}{{ $i | incr }}{{ if last $i $f }}{{ else }},{{ end }}
+	{{- end }}
+);
+`
+
+func (s *ServiceInstance) Create{{ $t.Name | title }}() ({{ $t.Name | title }}, error) {
+	err := s.DB.Update(func(tx *sqlx.Tx) error {
+		_, err := tx.Exec({{ $t.Name }}CreateQueryStr,{{" "}}{{range $i, $e := $f }}input.{{ $e.Name }}{{ if last $i $f }}{{ else }}, {{ end }}{{- end }})
+		return err
+	})
+	if err != nil {
+		return {{ $t.Name | title }}{}, err
+	}
+	
+	return {{ $t.Name | title }}{}, nil
+}
+
+func Archive{{ $t.Name | title }}(id string) error {
+	return nil
+}
+
+func Get{{ $t.Name | title }}(id string) ({{ $t.Name | title }}, error) {
+	return {{ $t.Name | title }}{}, nil
+}
+
+func Update{{ $t.Name | title }}(id string) ({{ $t.Name | title }}, error) {
+	return {{ $t.Name | title }}{}, nil
+}
+{{ "\n" }}
+{{- end }}

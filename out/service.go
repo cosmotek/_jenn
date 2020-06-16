@@ -1,3 +1,14 @@
+package main
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type ServiceInstance struct{
+	DB string
+}
 
 type User {
 	ID uuid.UUID
@@ -5,6 +16,32 @@ type User {
 	LastName string
 	JoinedAt time.Time
 	PhoneNumber string
+}
+
+const userCreateQueryStr = `
+INSERT INTO user (
+	"firstName",
+	"lastName",
+	"joinedAt",
+	"phoneNumber"
+) VALUES (
+	$1,
+	$2,
+	$3,
+	$4
+);
+`
+
+func (s *ServiceInstance) CreateUser() (User, error) {
+	err := s.DB.Update(func(tx *sqlx.Tx) error {
+		_, err := tx.Exec(userCreateQueryStr, input.firstName, input.lastName, input.joinedAt, input.phoneNumber)
+		return err
+	})
+	if err != nil {
+		return User{}, err
+	}
+	
+	return User{}, nil
 }
 
 func ArchiveUser(id string) error {
@@ -23,6 +60,26 @@ func UpdateUser(id string) (User, error) {
 type Cocktail {
 	ID uuid.UUID
 	Name string
+}
+
+const cocktailCreateQueryStr = `
+INSERT INTO cocktail (
+	"name"
+) VALUES (
+	$1
+);
+`
+
+func (s *ServiceInstance) CreateCocktail() (Cocktail, error) {
+	err := s.DB.Update(func(tx *sqlx.Tx) error {
+		_, err := tx.Exec(cocktailCreateQueryStr, input.name)
+		return err
+	})
+	if err != nil {
+		return Cocktail{}, err
+	}
+	
+	return Cocktail{}, nil
 }
 
 func ArchiveCocktail(id string) error {

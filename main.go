@@ -14,7 +14,12 @@ func main() {
 		panic(err)
 	}
 
-	protoStr, err := templates.ToStr(model, string(templates.PostgresTableCreationTemplate))
+	provisionDatabaseTmpl, err := templates.LoadFile(templates.ProvisionDatabaseTemplate)
+	if err != nil {
+		panic(err)
+	}
+
+	protoStr, err := templates.ToStr(model, provisionDatabaseTmpl)
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +29,12 @@ func main() {
 		panic(err)
 	}
 
-	protoStr, err = templates.ToStr(model, string(templates.GoServiceTemplate))
+	goServiceTmpl, err := templates.LoadFile(templates.GoServiceTemplate)
+	if err != nil {
+		panic(err)
+	}
+
+	protoStr, err = templates.ToStr(model, goServiceTmpl)
 	if err != nil {
 		panic(err)
 	}
