@@ -6,4 +6,5 @@ type Primitive interface {
 	SQLType() string
 	GoType() string
 	GRPCType() string
+	GoTypeZeroValueLiteral() string
 }

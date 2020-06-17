@@ -1,18 +1,22 @@
 package main
 
 import (
+	"context"
 	"time"
 
+	"github.com/cosmotek/pgdb"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type ServiceInstance struct{
-	DB string
+	Context context.Context
+	DB *pgdb.Database
 }
 {{- "\n" }}
 {{- $root := . }}
 {{- range $j, $t := $root.Types }}
-type {{ $t.Name | title }} {
+type {{ $t.Name | title }} struct{
 	ID uuid.UUID
 	{{- if $root.EnableUniversalArchiving }}
 	Archived bool
@@ -25,24 +29,33 @@ type {{ $t.Name | title }} {
 
 const {{ $t.Name }}CreateQueryStr = `
 INSERT INTO {{ $t.Name }} (
-	{{- if $root.EnableUniversalArchiving }}
-	_archived,
-	{{- end }}
+	"id",
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
 	{{ $e.Name | quotes }}{{ if last $i $f }}{{ else }},{{ end }}
 	{{- end }}
 ) VALUES (
+	$1,
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
-	{{ "$" }}{{ $i | incr }}{{ if last $i $f }}{{ else }},{{ end }}
+	{{ "$" }}{{ $i | incr | incr }}{{ if last $i $f }}{{ else }},{{ end }}
 	{{- end }}
 );
 `
 
 func (s *ServiceInstance) Create{{ $t.Name | title }}() ({{ $t.Name | title }}, error) {
-	err := s.DB.Update(func(tx *sqlx.Tx) error {
-		_, err := tx.Exec({{ $t.Name }}CreateQueryStr,{{" "}}{{range $i, $e := $f }}input.{{ $e.Name }}{{ if last $i $f }}{{ else }}, {{ end }}{{- end }})
+	input := {{ $t.Name | title }}{
+		ID: uuid.New(),
+		{{- if $root.EnableUniversalArchiving }}
+		Archived: false,
+		{{- end }}
+		{{- range $i, $f := $t.Fields }}
+		{{ $f.Name | title }}: {{ $f.Primitive.GoTypeZeroValueLiteral }},
+		{{- end }}
+	}
+	
+	err := s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec({{ $t.Name }}CreateQueryStr,{{" "}}{{range $i, $e := $f }}input.{{ $e.Name | title }}{{ if last $i $f }}{{ else }}, {{ end }}{{- end }})
 		return err
 	})
 	if err != nil {
@@ -52,9 +65,22 @@ func (s *ServiceInstance) Create{{ $t.Name | title }}() ({{ $t.Name | title }}, 
 	return {{ $t.Name | title }}{}, nil
 }
 
-func Archive{{ $t.Name | title }}(id string) error {
-	return nil
+{{- "\n" }}
+{{- if $root.EnableUniversalArchiving }}
+func (s *ServiceInstance) Archive{{ $t.Name | title }}(id string) error {
+	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec("UPDATE {{ $t.Name}} SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
+		return err
+	})
 }
+{{- else }}
+func (s *ServiceInstance) Delete{{ $t.Name | title }}(id string) error {
+	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec("DELETE FROM {{ $t.Name}} WHERE \"id\" = $1", id)
+		return err
+	})
+}
+{{- end }}
 
 func Get{{ $t.Name | title }}(id string) ({{ $t.Name | title }}, error) {
 	return {{ $t.Name | title }}{}, nil

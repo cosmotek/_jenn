@@ -32,3 +32,7 @@ func (s String) GoType() string {
 func (s String) GRPCType() string {
 	return "string"
 }
+
+func (s String) GoTypeZeroValueLiteral() string {
+	return "\"\""
+}

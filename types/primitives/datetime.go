@@ -13,3 +13,7 @@ func (d DateTime) GoType() string {
 func (d DateTime) GRPCType() string {
 	return "int64"
 }
+
+func (d DateTime) GoTypeZeroValueLiteral() string {
+	return "time.Time{}"
+}

@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"time"
 
+	"github.com/cosmotek/pgdb"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type ServiceInstance struct{
-	DB string
+	Context context.Context
+	DB *pgdb.Database
 }
 
-type User {
+type User struct{
 	ID uuid.UUID
 	FirstName string
 	LastName string
@@ -20,6 +24,7 @@ type User {
 
 const userCreateQueryStr = `
 INSERT INTO user (
+	"id",
 	"firstName",
 	"lastName",
 	"joinedAt",
@@ -28,13 +33,22 @@ INSERT INTO user (
 	$1,
 	$2,
 	$3,
-	$4
+	$4,
+	$5
 );
 `
 
 func (s *ServiceInstance) CreateUser() (User, error) {
-	err := s.DB.Update(func(tx *sqlx.Tx) error {
-		_, err := tx.Exec(userCreateQueryStr, input.firstName, input.lastName, input.joinedAt, input.phoneNumber)
+	input := User{
+		ID: uuid.New(),
+		FirstName: "",
+		LastName: "",
+		JoinedAt: time.Time{},
+		PhoneNumber: "",
+	}
+	
+	err := s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec(userCreateQueryStr, input.FirstName, input.LastName, input.JoinedAt, input.PhoneNumber)
 		return err
 	})
 	if err != nil {
@@ -44,8 +58,11 @@ func (s *ServiceInstance) CreateUser() (User, error) {
 	return User{}, nil
 }
 
-func ArchiveUser(id string) error {
-	return nil
+func (s *ServiceInstance) DeleteUser(id string) error {
+	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec("DELETE FROM user WHERE \"id\" = $1", id)
+		return err
+	})
 }
 
 func GetUser(id string) (User, error) {
@@ -57,22 +74,29 @@ func UpdateUser(id string) (User, error) {
 }
 
 
-type Cocktail {
+type Cocktail struct{
 	ID uuid.UUID
 	Name string
 }
 
 const cocktailCreateQueryStr = `
 INSERT INTO cocktail (
+	"id",
 	"name"
 ) VALUES (
-	$1
+	$1,
+	$2
 );
 `
 
 func (s *ServiceInstance) CreateCocktail() (Cocktail, error) {
-	err := s.DB.Update(func(tx *sqlx.Tx) error {
-		_, err := tx.Exec(cocktailCreateQueryStr, input.name)
+	input := Cocktail{
+		ID: uuid.New(),
+		Name: "",
+	}
+	
+	err := s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec(cocktailCreateQueryStr, input.Name)
 		return err
 	})
 	if err != nil {
@@ -82,8 +106,11 @@ func (s *ServiceInstance) CreateCocktail() (Cocktail, error) {
 	return Cocktail{}, nil
 }
 
-func ArchiveCocktail(id string) error {
-	return nil
+func (s *ServiceInstance) DeleteCocktail(id string) error {
+	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec("DELETE FROM cocktail WHERE \"id\" = $1", id)
+		return err
+	})
 }
 
 func GetCocktail(id string) (Cocktail, error) {
