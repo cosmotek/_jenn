@@ -1,6 +1,7 @@
 
 CREATE TABLE "user" (
 	"id" UUID PRIMARY KEY,
+	"_archived" BOOLEAN NOT NULL DEFAULT FALSE,
 	"firstName" VARCHAR(64) NOT NULL,
 	"lastName" VARCHAR(64) NOT NULL,
 	"joinedAt" timestamptz NOT NULL,
@@ -10,6 +11,7 @@ CREATE TABLE "user" (
 
 CREATE TABLE "cocktail" (
 	"id" UUID PRIMARY KEY,
+	"_archived" BOOLEAN NOT NULL DEFAULT FALSE,
 	"name" VARCHAR(512) NOT NULL
 );
 

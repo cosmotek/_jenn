@@ -1,0 +1,21 @@
+package main
+
+import (
+	"context"
+	"time"
+
+	"github.com/cosmotek/pgdb"
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+)
+
+{{- "\n" }}
+{{- $root := . }}
+{{- range $j, $t := $root.Types }}
+/api/v1/rpc/create{{ $t.Name | title }}
+{{- if $root.EnableUniversalArchiving }}
+/api/v1/rpc/archive{{ $t.Name | title }}
+{{- else }}
+/api/v1/rpc/delete{{ $t.Name | title }}
+{{- end }}
+{{- end }}

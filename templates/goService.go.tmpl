@@ -81,13 +81,4 @@ func (s *ServiceInstance) Delete{{ $t.Name | title }}(id string) error {
 	})
 }
 {{- end }}
-
-func Get{{ $t.Name | title }}(id string) ({{ $t.Name | title }}, error) {
-	return {{ $t.Name | title }}{}, nil
-}
-
-func Update{{ $t.Name | title }}(id string) ({{ $t.Name | title }}, error) {
-	return {{ $t.Name | title }}{}, nil
-}
-{{ "\n" }}
 {{- end }}

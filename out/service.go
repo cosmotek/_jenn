@@ -16,6 +16,7 @@ type ServiceInstance struct{
 
 type User struct{
 	ID uuid.UUID
+	Archived bool
 	FirstName string
 	LastName string
 	JoinedAt time.Time
@@ -41,6 +42,7 @@ INSERT INTO user (
 func (s *ServiceInstance) CreateUser() (User, error) {
 	input := User{
 		ID: uuid.New(),
+		Archived: false,
 		FirstName: "",
 		LastName: "",
 		JoinedAt: time.Time{},
@@ -58,9 +60,9 @@ func (s *ServiceInstance) CreateUser() (User, error) {
 	return User{}, nil
 }
 
-func (s *ServiceInstance) DeleteUser(id string) error {
+func (s *ServiceInstance) ArchiveUser(id string) error {
 	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
-		_, err := tx.Exec("DELETE FROM user WHERE \"id\" = $1", id)
+		_, err := tx.Exec("UPDATE user SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
 		return err
 	})
 }
@@ -76,6 +78,7 @@ func UpdateUser(id string) (User, error) {
 
 type Cocktail struct{
 	ID uuid.UUID
+	Archived bool
 	Name string
 }
 
@@ -92,6 +95,7 @@ INSERT INTO cocktail (
 func (s *ServiceInstance) CreateCocktail() (Cocktail, error) {
 	input := Cocktail{
 		ID: uuid.New(),
+		Archived: false,
 		Name: "",
 	}
 	
@@ -106,9 +110,9 @@ func (s *ServiceInstance) CreateCocktail() (Cocktail, error) {
 	return Cocktail{}, nil
 }
 
-func (s *ServiceInstance) DeleteCocktail(id string) error {
+func (s *ServiceInstance) ArchiveCocktail(id string) error {
 	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
-		_, err := tx.Exec("DELETE FROM cocktail WHERE \"id\" = $1", id)
+		_, err := tx.Exec("UPDATE cocktail SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
 		return err
 	})
 }

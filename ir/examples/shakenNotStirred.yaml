@@ -1,5 +1,5 @@
 name: shakenNotStirred
-enableuniversalarchiving: false
+enableuniversalarchiving: true
 types:
 - name: user
   description: ""

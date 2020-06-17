@@ -44,6 +44,21 @@ func main() {
 		panic(err)
 	}
 
+	jsClientTmpl, err := templates.LoadFile(templates.JSClientTemplate)
+	if err != nil {
+		panic(err)
+	}
+
+	protoStr, err = templates.ToStr(model, jsClientTmpl)
+	if err != nil {
+		panic(err)
+	}
+
+	err = ioutil.WriteFile("out/client.js", []byte(protoStr), os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
 	// model := ir.ModelIR{
 	// 	Name: "shakenNotStirred",
 	// 	Types: []ir.Structure{

@@ -1,0 +1,1 @@
+https://appspector.com/blog/how-to-improve-messagepack-javascript-parsing-speed-by-2-6-times
