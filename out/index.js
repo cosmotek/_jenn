@@ -2,7 +2,7 @@ const { fetch } = require('fetch-h2');
 const msgpack = require('msgpack-lite');
 
 fetch("http://localhost:5000/msg", {
-    method: 'POST',
+    method: 'OPTIONS',
     // mode: 'cors', // no-cors, *cors, same-origin
     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
     // credentials: 'same-origin', // include, *same-origin, omit
@@ -11,11 +11,11 @@ fetch("http://localhost:5000/msg", {
     // },
     // redirect: 'follow', // manual, *follow, error
     // referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    body: msgpack.encode({
+    body: JSON.stringify({
         message: "hello world",
     }),
 })
     // .then((res) => decode(res.body))
-    .then((res) => res.arrayBuffer())
-    .then((res) => msgpack.decode(new Uint8Array(res)))
+    .then((res) => res.json())
+    // .then((res) => msgpack.decode(new Uint8Array(res)))
     .then((res) => console.log(res));

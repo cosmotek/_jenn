@@ -2,20 +2,45 @@ package main
 
 import (
 	"context"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/cosmotek/pgdb"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"goji.io"
+	"goji.io/pat"
 )
 
 {{- "\n" }}
 {{- $root := . }}
-{{- range $j, $t := $root.Types }}
-/api/v1/rpc/create{{ $t.Name | title }}
-{{- if $root.EnableUniversalArchiving }}
-/api/v1/rpc/archive{{ $t.Name | title }}
-{{- else }}
-/api/v1/rpc/delete{{ $t.Name | title }}
-{{- end }}
-{{- end }}
+func main() {
+	service := ServiceInstance{}
+	mux := goji.NewMux()
+	{{- range $j, $t := $root.Types }}
+	mux.HandleFunc(pat.Options("/rpc/v1/create{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+		created, err := service.Create{{ $t.Name | title }}()
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+
+		// todo filter out fields by namespace
+		// todo use generated JSON stubs for perf improvements
+
+		err = json.NewEncoder(res).Encode(created)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
+	var d{{ $t.Name | title }} = `
+	{{- if $root.EnableUniversalArchiving }}
+	/rpc/v1/archive{{ $t.Name | title }}
+	{{- else }}
+	/rpc/v1/delete{{ $t.Name | title }}
+	{{- end }}
+	`
+	{{- end }}
+}

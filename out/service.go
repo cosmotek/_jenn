@@ -106,3 +106,4 @@ func (s *ServiceInstance) ArchiveCocktail(id string) error {
 		return err
 	})
 }
+
