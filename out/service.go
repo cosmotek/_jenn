@@ -66,16 +66,6 @@ func (s *ServiceInstance) ArchiveUser(id string) error {
 		return err
 	})
 }
-
-func GetUser(id string) (User, error) {
-	return User{}, nil
-}
-
-func UpdateUser(id string) (User, error) {
-	return User{}, nil
-}
-
-
 type Cocktail struct{
 	ID uuid.UUID
 	Archived bool
@@ -116,13 +106,3 @@ func (s *ServiceInstance) ArchiveCocktail(id string) error {
 		return err
 	})
 }
-
-func GetCocktail(id string) (Cocktail, error) {
-	return Cocktail{}, nil
-}
-
-func UpdateCocktail(id string) (Cocktail, error) {
-	return Cocktail{}, nil
-}
-
-

@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/cosmotek/_jenn/ir"
 	"github.com/cosmotek/_jenn/templates"
+
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 func main() {
@@ -58,6 +62,31 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	http.HandleFunc("/msg", func(res http.ResponseWriter, req *http.Request) {
+		body := map[string]interface{}{}
+		err := msgpack.NewDecoder(req.Body).Decode(&body)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			fmt.Println(err.Error())
+			return
+		}
+
+		fmt.Println("got", body)
+
+		err = msgpack.NewEncoder(res).Encode(map[string]interface{}{
+			"name": "seth",
+			"age":  20,
+			"male": true,
+			"dob":  "07/25/99",
+		})
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
+
+	http.ListenAndServe(":5000", nil)
 
 	// model := ir.ModelIR{
 	// 	Name: "shakenNotStirred",
