@@ -1,14 +1,13 @@
 package main
 
 import (
-	"context"
-	"io"
+	"encoding/json"
 	"net/http"
 	"time"
+	"context"
 
 	"github.com/cosmotek/pgdb"
-	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
+
 	"goji.io"
 	"goji.io/pat"
 )
@@ -16,8 +15,24 @@ import (
 {{- "\n" }}
 {{- $root := . }}
 func main() {
-	service := ServiceInstance{}
+	db, err := pgdb.Dial(pgdb.Config{
+		User: "user",
+		Password: "password",
+		Host: "localhost",
+		Port: "5432",
+		DatabaseName: "{{ $root.Name }}",
+		SSLDisabled: true,
+		MaxIdleConns: 10,
+		MaxOpenConns: 10,
+		MaxConnLifespan: time.Second * time.Duration(30),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	service := ServiceInstance{DB: db, Context: context.Background()}
 	mux := goji.NewMux()
+	{{- "\n" }}
 	{{- range $j, $t := $root.Types }}
 	mux.HandleFunc(pat.Options("/rpc/v1/create{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
 		created, err := service.Create{{ $t.Name | title }}()
@@ -35,12 +50,38 @@ func main() {
 			return
 		}
 	})
-	var d{{ $t.Name | title }} = `
+	
 	{{- if $root.EnableUniversalArchiving }}
-	/rpc/v1/archive{{ $t.Name | title }}
+	mux.HandleFunc(pat.Options("/rpc/v1/archive{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+		params := struct{ ID string }{}
+		err := json.NewDecoder(req.Body).Decode(&params)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+		
+		err = service.Archive{{ $t.Name | title }}(params.ID)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
 	{{- else }}
-	/rpc/v1/delete{{ $t.Name | title }}
+	mux.HandleFunc(pat.Options("/rpc/v1/delete{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+		params := struct{ ID string }{}
+		err := json.NewDecoder(req.Body).Decode(&params)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+		
+		err = service.Delete{{ $t.Name | title }}(params.ID)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
 	{{- end }}
-	`
 	{{- end }}
+	http.ListenAndServe(":5000", mux)
 }
