@@ -13,15 +13,13 @@ import (
 	"goji.io/pat"
 )
 
-{{- "\n" }}
-{{- $root := . }}
 func main() {
 	db, err := pgdb.Dial(pgdb.Config{
 		User: "user",
 		Password: "password",
 		Host: "localhost",
 		Port: "5432",
-		DatabaseName: "{{ $root.Name }}",
+		DatabaseName: "shakenNotStirred",
 		SSLDisabled: true,
 		MaxIdleConns: 10,
 		MaxOpenConns: 10,
@@ -33,10 +31,9 @@ func main() {
 
 	service := ServiceInstance{DB: db, Context: context.Background()}
 	mux := goji.NewMux()
-	{{- "\n" }}
-	{{- range $j, $t := $root.Types }}
-	mux.HandleFunc(pat.Options("/rpc/v1/create{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
-		created, err := service.Create{{ $t.Name | title }}()
+
+	mux.HandleFunc(pat.Options("/rpc/v1/createUser"), func(res http.ResponseWriter, req *http.Request) {
+		created, err := service.CreateUser()
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
@@ -51,9 +48,7 @@ func main() {
 			return
 		}
 	})
-	
-	{{- if $root.EnableUniversalArchiving }}
-	mux.HandleFunc(pat.Options("/rpc/v1/archive{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc(pat.Options("/rpc/v1/archiveUser"), func(res http.ResponseWriter, req *http.Request) {
 		params := struct{ ID string }{}
 		err := json.NewDecoder(req.Body).Decode(&params)
 		if err != nil {
@@ -61,14 +56,29 @@ func main() {
 			return
 		}
 		
-		err = service.Archive{{ $t.Name | title }}(params.ID)
+		err = service.ArchiveUser(params.ID)
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
 		}
 	})
-	{{- else }}
-	mux.HandleFunc(pat.Options("/rpc/v1/delete{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc(pat.Options("/rpc/v1/createCocktail"), func(res http.ResponseWriter, req *http.Request) {
+		created, err := service.CreateCocktail()
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+
+		// todo filter out fields by namespace
+		// todo use generated JSON stubs for perf improvements
+
+		err = json.NewEncoder(res).Encode(created)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
+	mux.HandleFunc(pat.Options("/rpc/v1/archiveCocktail"), func(res http.ResponseWriter, req *http.Request) {
 		params := struct{ ID string }{}
 		err := json.NewDecoder(req.Body).Decode(&params)
 		if err != nil {
@@ -76,14 +86,12 @@ func main() {
 			return
 		}
 		
-		err = service.Delete{{ $t.Name | title }}(params.ID)
+		err = service.ArchiveCocktail(params.ID)
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
 		}
 	})
-	{{- end }}
-	{{- end }}
 	log.Println("starting service on port 5000...")
 	http.ListenAndServe(":5000", mux)
 }

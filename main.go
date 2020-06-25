@@ -1,12 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/cosmotek/_jenn/ir"
 	"github.com/cosmotek/_jenn/templates"
 )
+
+var outputs = map[string]string{
+	"server/provision.sql": templates.ProvisionDatabaseTemplate,
+	"server/service.go":    templates.GoServiceTemplate,
+	"server/controller.go": templates.GoControllerTemplate,
+	"clients/client.js":    templates.JSClientTemplate,
+	"clients/client.dart":  templates.DartClientTemplate,
+}
 
 func main() {
 	model, err := ir.FromFile("ir/examples/shakenNotStirred.yaml")
@@ -14,64 +24,32 @@ func main() {
 		panic(err)
 	}
 
-	provisionDatabaseTmpl, err := templates.LoadFile(templates.ProvisionDatabaseTemplate)
+	err = os.MkdirAll(fmt.Sprintf("out/%s", model.Name), os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
 
-	protoStr, err := templates.ToStr(model, provisionDatabaseTmpl)
-	if err != nil {
-		panic(err)
-	}
+	for filename, templateString := range outputs {
+		templateData, err := templates.LoadFile(templateString)
+		if err != nil {
+			panic(err)
+		}
 
-	err = ioutil.WriteFile("out/provision.sql", []byte(protoStr), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
+		builtTemplate, err := templates.ToStr(model, templateData)
+		if err != nil {
+			panic(err)
+		}
 
-	goServiceTmpl, err := templates.LoadFile(templates.GoServiceTemplate)
-	if err != nil {
-		panic(err)
-	}
+		fullFilepath := filepath.Join(fmt.Sprintf("out/%s", model.Name), filename)
+		err = os.MkdirAll(filepath.Dir(fullFilepath), os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
 
-	protoStr, err = templates.ToStr(model, goServiceTmpl)
-	if err != nil {
-		panic(err)
-	}
-
-	err = ioutil.WriteFile("out/service.go", []byte(protoStr), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-
-	jsClientTmpl, err := templates.LoadFile(templates.JSClientTemplate)
-	if err != nil {
-		panic(err)
-	}
-
-	protoStr, err = templates.ToStr(model, jsClientTmpl)
-	if err != nil {
-		panic(err)
-	}
-
-	err = ioutil.WriteFile("out/client.js", []byte(protoStr), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-
-	goControllerTmpl, err := templates.LoadFile(templates.GoControllerTemplate)
-	if err != nil {
-		panic(err)
-	}
-
-	protoStr, err = templates.ToStr(model, goControllerTmpl)
-	if err != nil {
-		panic(err)
-	}
-
-	err = ioutil.WriteFile("out/controller.go", []byte(protoStr), os.ModePerm)
-	if err != nil {
-		panic(err)
+		err = ioutil.WriteFile(fullFilepath, []byte(builtTemplate), os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// model := ir.ModelIR{
