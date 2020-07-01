@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 {{- $root := . }}
 {{- range $j, $t := $root.Types }}
 CREATE TABLE {{ $t.Name | quotes }} (
@@ -14,7 +15,7 @@ CREATE TABLE {{ $t.Name | quotes }} (
 {{- $f := $t.Fields }}
 {{- range $i, $e := $f }}
 {{- if $e.Selector }}
-CREATE INDEX CONCURRENTLY index_{{ $t.Name }}_on_{{ $e.Name }}_trigram
+CREATE INDEX index_{{ $t.Name }}_on_{{ $e.Name }}_trigram
 ON {{ $t.Name | quotes }}
 USING gin ({{ $e.Name | quotes }} gin_trgm_ops);
 {{ "\n" }}

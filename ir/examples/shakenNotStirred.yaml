@@ -1,5 +1,6 @@
 name: shakenNotStirred
 enableuniversalarchiving: true
+enableeventstreams: true
 types:
 - name: user
   description: ""

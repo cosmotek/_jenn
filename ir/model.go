@@ -29,6 +29,7 @@ type Form struct {
 type ModelIR struct {
 	Name                     string
 	EnableUniversalArchiving bool
+	EnableEventStreams       bool
 
 	Types []Structure
 	Forms []Form

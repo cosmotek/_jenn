@@ -11,11 +11,11 @@ import (
 )
 
 var outputs = map[string]string{
-	"server/provision.sql": templates.ProvisionDatabaseTemplate,
-	"server/service.go":    templates.GoServiceTemplate,
-	"server/controller.go": templates.GoControllerTemplate,
-	"clients/client.js":    templates.JSClientTemplate,
-	"clients/client.dart":  templates.DartClientTemplate,
+	"server/migrations/1.sql": templates.ProvisionDatabaseTemplate,
+	"server/service.go":       templates.GoServiceTemplate,
+	"server/controller.go":    templates.GoControllerTemplate,
+	"clients/client.js":       templates.JSClientTemplate,
+	"clients/client.dart":     templates.DartClientTemplate,
 }
 
 func main() {

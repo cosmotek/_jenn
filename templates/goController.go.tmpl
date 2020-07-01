@@ -1,13 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 	"context"
+	"os"
 
 	"github.com/cosmotek/pgdb"
+	"github.com/rs/zerolog"
+	"github.com/gobwas/ws"
+	"github.com/gobwas/ws/wsutil"
 
 	"goji.io"
 	"goji.io/pat"
@@ -16,12 +21,14 @@ import (
 {{- "\n" }}
 {{- $root := . }}
 func main() {
+	logger := zerolog.New(os.Stdout)
 	db, err := pgdb.Dial(pgdb.Config{
 		User: "user",
 		Password: "password",
 		Host: "localhost",
 		Port: "5432",
 		DatabaseName: "{{ $root.Name }}",
+		MigrationDir: "./migrations",
 		SSLDisabled: true,
 		MaxIdleConns: 10,
 		MaxOpenConns: 10,
@@ -30,6 +37,26 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	migrationsDiff, err := db.DiffMigrations()
+	if err != nil {
+		panic(err)
+	}
+
+	currentMigration, err := db.GetCurrentMigration()
+	if err != nil {
+		panic(err)
+	}
+
+	migrationStatus, err := db.RunMigrations(logger, currentMigration, migrationsDiff...)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("applied %v\n", migrationStatus.Applied)
+	log.Printf("skipped %v\n", migrationStatus.Skipped)
+	log.Printf("failed %v\n", migrationStatus.Failed)
+	log.Printf("latest %v\n", migrationStatus.Latest)
 
 	service := ServiceInstance{DB: db, Context: context.Background()}
 	mux := goji.NewMux()
@@ -51,6 +78,47 @@ func main() {
 			return
 		}
 	})
+
+	{{- if $root.EnableEventStreams }}
+	mux.HandleFunc(pat.Get("/rpc/v1/stream{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
+		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		if err != nil {
+			// handle error
+			http.Error(res, err.Error(), 500)
+			return
+		}
+
+		go func() {
+			defer conn.Close()
+
+			ticker := time.NewTicker(time.Second * 3)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-req.Context().Done():
+					log.Println("closing stream.")
+					return
+				case <-ticker.C:
+					msg, _, err := wsutil.ReadClientData(conn)
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+					log.Println(msg)
+
+					err = wsutil.WriteServerMessage(conn, ws.OpText, time.Now().String())
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+				}
+			}
+		}()
+	})
+	{{- end }}
 	
 	{{- if $root.EnableUniversalArchiving }}
 	mux.HandleFunc(pat.Options("/rpc/v1/archive{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {

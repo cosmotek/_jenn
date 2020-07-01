@@ -1,25 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 	"context"
+	"os"
 
 	"github.com/cosmotek/pgdb"
+	"github.com/rs/zerolog"
 
 	"goji.io"
 	"goji.io/pat"
 )
 
 func main() {
+	logger := zerolog.New(os.Stdout)
 	db, err := pgdb.Dial(pgdb.Config{
 		User: "user",
 		Password: "password",
 		Host: "localhost",
 		Port: "5432",
 		DatabaseName: "shakenNotStirred",
+		MigrationDir: "./migrations",
 		SSLDisabled: true,
 		MaxIdleConns: 10,
 		MaxOpenConns: 10,
@@ -28,6 +33,26 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	migrationsDiff, err := db.DiffMigrations()
+	if err != nil {
+		panic(err)
+	}
+
+	currentMigration, err := db.GetCurrentMigration()
+	if err != nil {
+		panic(err)
+	}
+
+	migrationStatus, err := db.RunMigrations(logger, currentMigration, migrationsDiff...)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("applied %v\n", migrationStatus.Applied)
+	log.Printf("skipped %v\n", migrationStatus.Skipped)
+	log.Printf("failed %v\n", migrationStatus.Failed)
+	log.Printf("latest %v\n", migrationStatus.Latest)
 
 	service := ServiceInstance{DB: db, Context: context.Background()}
 	mux := goji.NewMux()
@@ -46,6 +71,33 @@ func main() {
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
+		}
+	})
+	mux.HandleFunc(pat.Get("/rpc/v1/streamUser"), func(res http.ResponseWriter, req *http.Request) {
+		stream, ok := res.(http.Flusher)
+		if !ok {
+			http.Error(res, "streaming not supported by transport", http.StatusPreconditionFailed)
+			return
+		}
+
+		res.Header().Set("Content-Type", "text/event-stream")
+		res.Header().Set("Cache-Control", "no-cache")
+		res.Header().Set("Connection", "keep-alive")
+		res.Header().Set("Access-Control-Allow-Origin", "*")
+
+		ticker := time.NewTicker(time.Second * 3)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-req.Context().Done():
+				log.Println("closing stream.")
+				return
+			case <-ticker.C:
+				log.Println("ticker ticked...")
+				fmt.Fprintf(res, "data: User %s\n\n", time.Now().String())
+				stream.Flush()
+			}
 		}
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/archiveUser"), func(res http.ResponseWriter, req *http.Request) {
@@ -76,6 +128,33 @@ func main() {
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
+		}
+	})
+	mux.HandleFunc(pat.Get("/rpc/v1/streamCocktail"), func(res http.ResponseWriter, req *http.Request) {
+		stream, ok := res.(http.Flusher)
+		if !ok {
+			http.Error(res, "streaming not supported by transport", http.StatusPreconditionFailed)
+			return
+		}
+
+		res.Header().Set("Content-Type", "text/event-stream")
+		res.Header().Set("Cache-Control", "no-cache")
+		res.Header().Set("Connection", "keep-alive")
+		res.Header().Set("Access-Control-Allow-Origin", "*")
+
+		ticker := time.NewTicker(time.Second * 3)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-req.Context().Done():
+				log.Println("closing stream.")
+				return
+			case <-ticker.C:
+				log.Println("ticker ticked...")
+				fmt.Fprintf(res, "data: Cocktail %s\n\n", time.Now().String())
+				stream.Flush()
+			}
 		}
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/archiveCocktail"), func(res http.ResponseWriter, req *http.Request) {

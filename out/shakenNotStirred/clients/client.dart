@@ -34,12 +34,32 @@ class Client {
     }
   }
 
+  Future<dynamic> streamUser() async {
+    var req = await _client.open('GET', _host, _port, '/rpc/v1/streamUser');
+    
+    // set headers
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'text/event-stream');
+
+    // add body
+    req.add(utf8.encode(json.encode({})));
+
+    var res = await req.close();
+    if (res.statusCode != 200) {
+      throw 'Its not all good... ${res.statusCode}';
+    }
+
+    await for (var body in res.transform(utf8.decoder)) {
+      // return body;
+      print(body);
+    }
+  }
   Future<dynamic> archiveUser() async {
     var req = await _client.open('OPTIONS', _host, _port, '/rpc/v1/archiveUser');
     
     // set headers
-    req.headers.set('content-type', 'application/json');
-    req.headers.set('accepts', 'application/json');
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'application/json');
 
     // add body
     req.add(utf8.encode(json.encode({})));
@@ -74,12 +94,32 @@ class Client {
     }
   }
 
+  Future<dynamic> streamCocktail() async {
+    var req = await _client.open('GET', _host, _port, '/rpc/v1/streamCocktail');
+    
+    // set headers
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'text/event-stream');
+
+    // add body
+    req.add(utf8.encode(json.encode({})));
+
+    var res = await req.close();
+    if (res.statusCode != 200) {
+      throw 'Its not all good... ${res.statusCode}';
+    }
+
+    await for (var body in res.transform(utf8.decoder)) {
+      // return body;
+      print(body);
+    }
+  }
   Future<dynamic> archiveCocktail() async {
     var req = await _client.open('OPTIONS', _host, _port, '/rpc/v1/archiveCocktail');
     
     // set headers
-    req.headers.set('content-type', 'application/json');
-    req.headers.set('accepts', 'application/json');
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'application/json');
 
     // add body
     req.add(utf8.encode(json.encode({})));
@@ -94,4 +134,8 @@ class Client {
     }
   }
 
+}
+
+void main() {
+  Client("localhost", 5000).streamUser();
 }
