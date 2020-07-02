@@ -7,6 +7,7 @@ import (
 
 	irTypes "github.com/cosmotek/_jenn/ir/types"
 	"github.com/cosmotek/_jenn/types"
+	"github.com/cosmotek/_jenn/types/registry"
 )
 
 type Structure struct {
@@ -16,14 +17,14 @@ type Structure struct {
 	Fields []Field
 }
 
-type FormAssignment struct {
-	TypeName  string
-	FieldName string
+type Form struct {
+	// TypeName -> FieldNames
+	Fields map[string][]string
 }
 
-type Form struct {
+type Enum struct {
 	Name   string
-	Fields map[FormAssignment]Field
+	Values []string
 }
 
 type ModelIR struct {
@@ -32,7 +33,11 @@ type ModelIR struct {
 	EnableEventStreams       bool
 
 	Types []Structure
-	Forms []Form
+	Enums []Enum
+	Forms []Structure `yaml:"-"`
+
+	FieldDerviedForms   map[string][]string `yaml:"forms"`
+	GeneratedTypeBlocks []string            `yaml:"-"`
 }
 
 type Field struct {
@@ -59,15 +64,44 @@ func FromFile(filename string) (ModelIR, error) {
 		return ModelIR{}, err
 	}
 
+	reg := registry.Registry{}
+	for _, enum := range model.Enums {
+		reg.Add(enum.Name, enum.Values...)
+	}
+
 	for i, structure := range model.Types {
 		for j, field := range structure.Fields {
-			prim, err := irTypes.ResolvePrimitive(field.TypeOf)
+			prim, typeBlocks, err := irTypes.ResolvePrimitive(reg, field.TypeOf)
 			if err != nil {
 				return ModelIR{}, err
 			}
 
 			model.Types[i].Fields[j].Primitive = prim
+			model.GeneratedTypeBlocks = append(model.GeneratedTypeBlocks, typeBlocks...)
 		}
+	}
+
+	for typeOf, fieldNames := range model.FieldDerviedForms {
+		fields := []Field{}
+
+		for _, structure := range model.Types {
+			if structure.Name == typeOf {
+				for _, field := range structure.Fields {
+					for _, fieldName := range fieldNames {
+						if field.Name == fieldName {
+							fields = append(fields, field)
+						}
+					}
+				}
+			}
+		}
+
+		newForm := Structure{
+			Name:   typeOf,
+			Fields: fields,
+		}
+
+		model.Forms = append(model.Forms, newForm)
 	}
 
 	return model, nil

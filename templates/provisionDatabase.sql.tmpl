@@ -17,7 +17,7 @@ CREATE TABLE {{ $t.Name | quotes }} (
 {{- if $e.Selector }}
 CREATE INDEX index_{{ $t.Name }}_on_{{ $e.Name }}_trigram
 ON {{ $t.Name | quotes }}
-USING gin ({{ $e.Name | quotes }} gin_trgm_ops);
+USING {{ $e.Primitive.SQLIndexType $e.Name }};
 {{ "\n" }}
 {{- end }}
 {{- end }}

@@ -14,6 +14,21 @@ type ServiceInstance struct{
 	DB *pgdb.Database
 }
 
+// custom enum type definitions
+
+type BeverageType string
+
+const (
+	Beer BeverageType = "Beer"
+	Liquor BeverageType = "Liquor"
+	Wine BeverageType = "Wine"
+)
+
+type BeverageInput struct{
+	Name string
+	Proof int
+	Type BeverageType
+}
 type User struct{
 	ID uuid.UUID
 	Archived bool
@@ -106,4 +121,51 @@ func (s *ServiceInstance) ArchiveCocktail(id string) error {
 		return err
 	})
 }
+type Beverage struct{
+	ID uuid.UUID
+	Archived bool
+	Name string
+	Proof int
+	Type BeverageType
+}
 
+const beverageCreateQueryStr = `
+INSERT INTO beverage (
+	"id",
+	"name",
+	"proof",
+	"type"
+) VALUES (
+	$1,
+	$2,
+	$3,
+	$4
+);
+`
+
+func (s *ServiceInstance) CreateBeverage() (Beverage, error) {
+	input := Beverage{
+		ID: uuid.New(),
+		Archived: false,
+		Name: "",
+		Proof: 0,
+		Type: "",
+	}
+	
+	err := s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec(beverageCreateQueryStr, input.Name, input.Proof, input.Type)
+		return err
+	})
+	if err != nil {
+		return Beverage{}, err
+	}
+	
+	return Beverage{}, nil
+}
+
+func (s *ServiceInstance) ArchiveBeverage(id string) error {
+	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.Exec("UPDATE beverage SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
+		return err
+	})
+}

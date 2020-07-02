@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
-
-	"github.com/cosmotek/_jenn/ir"
 )
 
 var TemplateHelperFuncs = map[string]interface{}{
@@ -33,8 +31,8 @@ var TemplateHelperFuncs = map[string]interface{}{
 	},
 }
 
-func ToStr(model ir.ModelIR, inputTemplate string) (string, error) {
-	tmpl, err := template.New(model.Name).
+func ToStr(model interface{}, name, inputTemplate string) (string, error) {
+	tmpl, err := template.New(name).
 		Funcs(TemplateHelperFuncs).
 		Parse(inputTemplate)
 	if err != nil {

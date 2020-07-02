@@ -1,6 +1,12 @@
 name: shakenNotStirred
 enableuniversalarchiving: true
 enableeventstreams: true
+enums:
+- name: beverageType
+  values:
+    - BEER
+    - LIQUOR
+    - WINE
 types:
 - name: user
   description: ""
@@ -38,30 +44,29 @@ types:
     selector: true
     optional: false
     defaultvalue: null
-forms:
-- name: ""
+- name: beverage
+  description: ""
   fields:
-    ? typename: user
-      fieldname: firstName
-    : name: firstName
-      description: ""
-      typeof: name
-      selector: false
-      optional: false
-      defaultvalue: null
-    ? typename: user
-      fieldname: lastName
-    : name: lastName
-      description: ""
-      typeof: name
-      selector: false
-      optional: false
-      defaultvalue: null
-    ? typename: user
-      fieldname: phoneNumber
-    : name: phoneNumber
-      description: ""
-      typeof: name
-      selector: false
-      optional: false
-      defaultvalue: null
+  - name: name
+    description: ""
+    typeof: string
+    selector: true
+    optional: false
+    defaultvalue: null
+  - name: proof
+    description: ""
+    typeof: number
+    selector: true
+    optional: false
+    defaultvalue: null
+  - name: type
+    description: ""
+    typeof: beverageType
+    selector: true
+    optional: false
+    defaultvalue: null
+forms:
+  beverage:
+  - name
+  - proof
+  - type

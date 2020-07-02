@@ -35,7 +35,7 @@ func main() {
 			panic(err)
 		}
 
-		builtTemplate, err := templates.ToStr(model, templateData)
+		builtTemplate, err := templates.ToStr(model, model.Name, templateData)
 		if err != nil {
 			panic(err)
 		}
@@ -106,7 +106,7 @@ func main() {
 	// 	},
 	// }
 
-	// file, err := os.Create("ir/examples/shakenNotStirred.yaml")
+	// file, err := os.Create("ir/examples/shakenNotStirredv2.yaml")
 	// if err != nil {
 	// 	panic(err)
 	// }

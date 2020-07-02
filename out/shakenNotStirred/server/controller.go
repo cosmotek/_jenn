@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -11,6 +10,8 @@ import (
 
 	"github.com/cosmotek/pgdb"
 	"github.com/rs/zerolog"
+	"github.com/gobwas/ws"
+	"github.com/gobwas/ws/wsutil"
 
 	"goji.io"
 	"goji.io/pat"
@@ -74,31 +75,42 @@ func main() {
 		}
 	})
 	mux.HandleFunc(pat.Get("/rpc/v1/streamUser"), func(res http.ResponseWriter, req *http.Request) {
-		stream, ok := res.(http.Flusher)
-		if !ok {
-			http.Error(res, "streaming not supported by transport", http.StatusPreconditionFailed)
+		conn, _, _, err := ws.UpgradeHTTP(req, res)
+		if err != nil {
+			// handle error
+			http.Error(res, err.Error(), 500)
 			return
 		}
 
-		res.Header().Set("Content-Type", "text/event-stream")
-		res.Header().Set("Cache-Control", "no-cache")
-		res.Header().Set("Connection", "keep-alive")
-		res.Header().Set("Access-Control-Allow-Origin", "*")
+		go func() {
+			defer conn.Close()
 
-		ticker := time.NewTicker(time.Second * 3)
-		defer ticker.Stop()
+			ticker := time.NewTicker(time.Second * 3)
+			defer ticker.Stop()
 
-		for {
-			select {
-			case <-req.Context().Done():
-				log.Println("closing stream.")
-				return
-			case <-ticker.C:
-				log.Println("ticker ticked...")
-				fmt.Fprintf(res, "data: User %s\n\n", time.Now().String())
-				stream.Flush()
+			for {
+				select {
+				case <-req.Context().Done():
+					log.Println("closing stream.")
+					return
+				case <-ticker.C:
+					msg, _, err := wsutil.ReadClientData(conn)
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+					log.Println(msg)
+
+					err = wsutil.WriteServerMessage(conn, ws.OpText, []byte(time.Now().String()))
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+				}
 			}
-		}
+		}()
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/archiveUser"), func(res http.ResponseWriter, req *http.Request) {
 		params := struct{ ID string }{}
@@ -131,31 +143,42 @@ func main() {
 		}
 	})
 	mux.HandleFunc(pat.Get("/rpc/v1/streamCocktail"), func(res http.ResponseWriter, req *http.Request) {
-		stream, ok := res.(http.Flusher)
-		if !ok {
-			http.Error(res, "streaming not supported by transport", http.StatusPreconditionFailed)
+		conn, _, _, err := ws.UpgradeHTTP(req, res)
+		if err != nil {
+			// handle error
+			http.Error(res, err.Error(), 500)
 			return
 		}
 
-		res.Header().Set("Content-Type", "text/event-stream")
-		res.Header().Set("Cache-Control", "no-cache")
-		res.Header().Set("Connection", "keep-alive")
-		res.Header().Set("Access-Control-Allow-Origin", "*")
+		go func() {
+			defer conn.Close()
 
-		ticker := time.NewTicker(time.Second * 3)
-		defer ticker.Stop()
+			ticker := time.NewTicker(time.Second * 3)
+			defer ticker.Stop()
 
-		for {
-			select {
-			case <-req.Context().Done():
-				log.Println("closing stream.")
-				return
-			case <-ticker.C:
-				log.Println("ticker ticked...")
-				fmt.Fprintf(res, "data: Cocktail %s\n\n", time.Now().String())
-				stream.Flush()
+			for {
+				select {
+				case <-req.Context().Done():
+					log.Println("closing stream.")
+					return
+				case <-ticker.C:
+					msg, _, err := wsutil.ReadClientData(conn)
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+					log.Println(msg)
+
+					err = wsutil.WriteServerMessage(conn, ws.OpText, []byte(time.Now().String()))
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+				}
 			}
-		}
+		}()
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/archiveCocktail"), func(res http.ResponseWriter, req *http.Request) {
 		params := struct{ ID string }{}
@@ -166,6 +189,74 @@ func main() {
 		}
 		
 		err = service.ArchiveCocktail(params.ID)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
+	mux.HandleFunc(pat.Options("/rpc/v1/createBeverage"), func(res http.ResponseWriter, req *http.Request) {
+		created, err := service.CreateBeverage()
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+
+		// todo filter out fields by namespace
+		// todo use generated JSON stubs for perf improvements
+
+		err = json.NewEncoder(res).Encode(created)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+	})
+	mux.HandleFunc(pat.Get("/rpc/v1/streamBeverage"), func(res http.ResponseWriter, req *http.Request) {
+		conn, _, _, err := ws.UpgradeHTTP(req, res)
+		if err != nil {
+			// handle error
+			http.Error(res, err.Error(), 500)
+			return
+		}
+
+		go func() {
+			defer conn.Close()
+
+			ticker := time.NewTicker(time.Second * 3)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-req.Context().Done():
+					log.Println("closing stream.")
+					return
+				case <-ticker.C:
+					msg, _, err := wsutil.ReadClientData(conn)
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+					log.Println(msg)
+
+					err = wsutil.WriteServerMessage(conn, ws.OpText, []byte(time.Now().String()))
+					if err != nil {
+						// handle error
+						http.Error(res, err.Error(), 500)
+						return
+					}
+				}
+			}
+		}()
+	})
+	mux.HandleFunc(pat.Options("/rpc/v1/archiveBeverage"), func(res http.ResponseWriter, req *http.Request) {
+		params := struct{ ID string }{}
+		err := json.NewDecoder(req.Body).Decode(&params)
+		if err != nil {
+			http.Error(res, err.Error(), 500)
+			return
+		}
+		
+		err = service.ArchiveBeverage(params.ID)
 		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return

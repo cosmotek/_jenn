@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -81,7 +80,7 @@ func main() {
 
 	{{- if $root.EnableEventStreams }}
 	mux.HandleFunc(pat.Get("/rpc/v1/stream{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		conn, _, _, err := ws.UpgradeHTTP(req, res)
 		if err != nil {
 			// handle error
 			http.Error(res, err.Error(), 500)
@@ -108,7 +107,7 @@ func main() {
 					}
 					log.Println(msg)
 
-					err = wsutil.WriteServerMessage(conn, ws.OpText, time.Now().String())
+					err = wsutil.WriteServerMessage(conn, ws.OpText, []byte(time.Now().String()))
 					if err != nil {
 						// handle error
 						http.Error(res, err.Error(), 500)

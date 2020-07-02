@@ -15,6 +15,20 @@ type ServiceInstance struct{
 }
 {{- "\n" }}
 {{- $root := . }}
+// custom enum type definitions
+{{- range $i, $e := $root.GeneratedTypeBlocks }}
+{{ $e }}
+{{- end }}
+
+{{- range $j, $t := $root.Forms }}
+type {{ $t.Name | title }}Input struct{
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{ $e.Name | title }} {{ $e.Primitive.GoType }}
+	{{- end }}
+}
+{{- end}}
+
 {{- range $j, $t := $root.Types }}
 type {{ $t.Name | title }} struct{
 	ID uuid.UUID
@@ -82,4 +96,3 @@ func (s *ServiceInstance) Delete{{ $t.Name | title }}(id string) error {
 }
 {{- end }}
 {{- end }}
-

@@ -4,7 +4,14 @@ package types
 // into generated code (SQL, Go etc).
 type Primitive interface {
 	SQLType() string
+	SQLIndexType(string) string
+
 	GoType() string
-	GRPCType() string
 	GoTypeZeroValueLiteral() string
+
+	// generates templates for type definitions etc
+	ExecTemplates() (string, error)
+
+	// generates templates for precreate hooks
+	ExecPrecreateFuncTemplates() (string, error)
 }

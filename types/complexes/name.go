@@ -13,3 +13,11 @@ func (n Name) PrimitiveRoot() types.Primitive {
 		MaxLength: 64,
 	}
 }
+
+func (n Name) ExecTemplates() (string, error) {
+	return "", nil
+}
+
+func (n Name) ExecPrecreateFuncTemplates() (string, error) {
+	return "", nil
+}

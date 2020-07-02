@@ -21,6 +21,10 @@ func (s String) SQLType() string {
 	return fmt.Sprintf("VARCHAR(%d)%s", length, opts)
 }
 
+func (d String) SQLIndexType(fieldName string) string {
+	return fmt.Sprintf("gin (\"%s\" gin_trgm_ops)", fieldName)
+}
+
 func (s String) GoType() string {
 	if s.Nullable {
 		return "*string"
@@ -29,10 +33,14 @@ func (s String) GoType() string {
 	return "string"
 }
 
-func (s String) GRPCType() string {
-	return "string"
-}
-
 func (s String) GoTypeZeroValueLiteral() string {
 	return "\"\""
+}
+
+func (s String) ExecTemplates() (string, error) {
+	return "", nil
+}
+
+func (s String) ExecPrecreateFuncTemplates() (string, error) {
+	return "", nil
 }

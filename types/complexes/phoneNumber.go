@@ -13,3 +13,11 @@ func (p PhoneNumber) PrimitiveRoot() types.Primitive {
 		MaxLength: 10,
 	}
 }
+
+func (p PhoneNumber) ExecTemplates() (string, error) {
+	return "", nil
+}
+
+func (p PhoneNumber) ExecPrecreateFuncTemplates() (string, error) {
+	return "", nil
+}

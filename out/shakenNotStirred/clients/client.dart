@@ -134,6 +134,66 @@ class Client {
     }
   }
 
+  Future<dynamic> createBeverage() async {
+    var req = await _client.open('OPTIONS', _host, _port, '/rpc/v1/createBeverage');
+    
+    // set headers
+    req.headers.set('content-type', 'application/json');
+    req.headers.set('accepts', 'application/json');
+
+    // add body
+    req.add(utf8.encode(json.encode({})));
+
+    var res = await req.close();
+    if (res.statusCode != 200) {
+      throw 'Its not all good... ${res.statusCode}';
+    }
+
+    await for (var body in res.transform(utf8.decoder)) {
+      return body;
+    }
+  }
+
+  Future<dynamic> streamBeverage() async {
+    var req = await _client.open('GET', _host, _port, '/rpc/v1/streamBeverage');
+    
+    // set headers
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'text/event-stream');
+
+    // add body
+    req.add(utf8.encode(json.encode({})));
+
+    var res = await req.close();
+    if (res.statusCode != 200) {
+      throw 'Its not all good... ${res.statusCode}';
+    }
+
+    await for (var body in res.transform(utf8.decoder)) {
+      // return body;
+      print(body);
+    }
+  }
+  Future<dynamic> archiveBeverage() async {
+    var req = await _client.open('OPTIONS', _host, _port, '/rpc/v1/archiveBeverage');
+    
+    // set headers
+    req.headers.set('Content-Type', 'application/json');
+    req.headers.set('Accepts', 'application/json');
+
+    // add body
+    req.add(utf8.encode(json.encode({})));
+
+    var res = await req.close();
+    if (res.statusCode != 200) {
+      throw 'Its not all good... ${res.statusCode}';
+    }
+
+    await for (var body in res.transform(utf8.decoder)) {
+      return body;
+    }
+  }
+
 }
 
 void main() {
