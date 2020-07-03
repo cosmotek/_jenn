@@ -12,9 +12,8 @@ type User(name, joinedAt, email, phoneNumber) {
     joinedAt: DateTime = Now()
     email: ?Email
     phoneNumber: PhoneNumber
-
-    @namespace(internal)
-    canonicalID: CanonicalID
+    tags: [String]
+    canonicalID: CanonicalID @namespace(internal)
 }
 
 type Beverage {
