@@ -1,3 +1,5 @@
+app ShakenNotStirred
+
 enum BeverageType {
     BEER,
     LIQUOR,
@@ -10,10 +12,19 @@ type User(name, joinedAt, email, phoneNumber) {
     joinedAt: DateTime = Now()
     email: ?Email
     phoneNumber: PhoneNumber
+
+    @namespace(internal)
+    canonicalID: CanonicalID
 }
 
-type Beverage() {
+type Beverage {
     name: Name
     proof: Number
     type: BeverageType
+}
+
+@namespace(internal)
+type Rating {
+    user: User
+    rating: Number
 }
