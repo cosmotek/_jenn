@@ -1,0 +1,19 @@
+enum BeverageType {
+    BEER,
+    LIQUOR,
+    WINE,
+}
+
+type User(name, joinedAt, email, phoneNumber) {
+    // this is a description example
+    name: Name
+    joinedAt: DateTime = Now()
+    email: ?Email
+    phoneNumber: PhoneNumber
+}
+
+type Beverage() {
+    name: Name
+    proof: Number
+    type: BeverageType
+}
