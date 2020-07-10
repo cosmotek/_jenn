@@ -1,3 +1,4 @@
+# this file is a simple-ish example of a jenn schema for creating CRUD apps
 app ShakenNotStirred
 
 enum BeverageType {
@@ -6,20 +7,20 @@ enum BeverageType {
     WINE,
 }
 
-type User(name, joinedAt, email, phoneNumber) {
-    // this is a description example
-    name: Name
-    joinedAt: DateTime = Now()
-    email: ?Email
-    phoneNumber: PhoneNumber
-    tags: [String]
-    canonicalID: CanonicalID @namespace(internal)
-}
+# type User(name, joinedAt, email, phoneNumber) {
+#     // this is a description example
+#     name: Name
+#     joinedAt: DateTime = Now()
+#     email: ?Email
+#     phoneNumber: PhoneNumber
+#     tags: [String]
+#     canonicalID: CanonicalID @namespace(internal)
+# }
 
 type Beverage {
     name: Name
     proof: Number
-    type: BeverageType
+    typeOf: BeverageType
 }
 
 @namespace(internal)

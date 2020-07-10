@@ -143,6 +143,12 @@ type Beverage {
 	},
 	"complex test": tokenTest{
 		Input: `
+# I want to test out app descriptions
+# so this is a multiline comment
+# I wonder if this will work
+
+# going to test a line of separation
+
 app ShakenNotStirred
 
 enum BeverageType {
@@ -159,9 +165,11 @@ type User(name, joinedAt, email, phoneNumber) {
 	phoneNumber: PhoneNumber
 	tags: [String]
 	canonicalID: CanonicalID @namespace(internal)
+	canAccessLegacy: Bool = true
 }
 
 type Beverage {
+	# comments can use hash symbols too!
 	name: Name
 	proof: Number
 	type: BeverageType
@@ -186,7 +194,7 @@ func TestNextToken(t *testing.T) {
 			literals := []string{}
 
 			for {
-				tok, lit := lex.NextToken()
+				tok, lit := lex.NextTokenWithLiteral()
 				if tok != SPACE && tok != TAB {
 					tokens = append(tokens, tok)
 					literals = append(literals, lit)

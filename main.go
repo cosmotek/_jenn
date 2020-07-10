@@ -1,56 +1,55 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 
-	"github.com/cosmotek/_jenn/ir"
-	"github.com/cosmotek/_jenn/templates"
+	"github.com/cosmotek/_jenn/hll"
 )
 
-var outputs = map[string]string{
-	"server/migrations/1.sql": templates.ProvisionDatabaseTemplate,
-	"server/service.go":       templates.GoServiceTemplate,
-	"server/controller.go":    templates.GoControllerTemplate,
-	"clients/client.js":       templates.JSClientTemplate,
-	"clients/client.dart":     templates.DartClientTemplate,
-}
+// "github.com/cosmotek/_jenn/ir"
+// "github.com/cosmotek/_jenn/templates"
+
+// var outputs = map[string]string{
+// 	"server/migrations/1.sql": templates.ProvisionDatabaseTemplate,
+// 	"server/service.go":       templates.GoServiceTemplate,
+// 	"server/controller.go":    templates.GoControllerTemplate,
+// 	"clients/client.js":       templates.JSClientTemplate,
+// 	"clients/client.dart":     templates.DartClientTemplate,
+// }
 
 func main() {
-	model, err := ir.FromFile("ir/examples/shakenNotStirred.yaml")
-	if err != nil {
-		panic(err)
-	}
+	// model, err := ir.FromFile("ir/examples/shakenNotStirred.yaml")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	err = os.MkdirAll(fmt.Sprintf("out/%s", model.Name), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
+	// err = os.MkdirAll(fmt.Sprintf("out/%s", model.Name), os.ModePerm)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	for filename, templateString := range outputs {
-		templateData, err := templates.LoadFile(templateString)
-		if err != nil {
-			panic(err)
-		}
+	// for filename, templateString := range outputs {
+	// 	templateData, err := templates.LoadFile(templateString)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		builtTemplate, err := templates.ToStr(model, model.Name, templateData)
-		if err != nil {
-			panic(err)
-		}
+	// 	builtTemplate, err := templates.ToStr(model, model.Name, templateData)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		fullFilepath := filepath.Join(fmt.Sprintf("out/%s", model.Name), filename)
-		err = os.MkdirAll(filepath.Dir(fullFilepath), os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
+	// 	fullFilepath := filepath.Join(fmt.Sprintf("out/%s", model.Name), filename)
+	// 	err = os.MkdirAll(filepath.Dir(fullFilepath), os.ModePerm)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		err = ioutil.WriteFile(fullFilepath, []byte(builtTemplate), os.ModePerm)
-		if err != nil {
-			panic(err)
-		}
-	}
+	// 	err = ioutil.WriteFile(fullFilepath, []byte(builtTemplate), os.ModePerm)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// }
 
 	// model := ir.ModelIR{
 	// 	Name: "shakenNotStirred",
@@ -116,4 +115,9 @@ func main() {
 	// if err != nil {
 	// 	panic(err)
 	// }
+
+	err := hll.Compile(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
 }

@@ -10,6 +10,8 @@ const (
 	IDENT  = "IDENT"
 	INT    = "INT"
 	STRING = "STRING"
+	TRUE   = "TRUE"
+	FALSE  = "FALSE"
 
 	// Operators
 	ASSIGN     = "ASSIGN"
@@ -19,6 +21,7 @@ const (
 
 	// Delimiters
 	COMMA   = "COMMA"
+	PERIOD  = "PERIOD"
 	COLON   = "COLON"
 	NEWLINE = "NEWLINE"
 
@@ -30,20 +33,34 @@ const (
 	RBRACKET = "RBRACKET"
 
 	// Keywords
-	TYPE = "TYPE"
-	ENUM = "ENUM"
-	APP  = "APP"
-)
+	TYPE      = "TYPE"
+	ENUM      = "ENUM"
+	APP       = "APP"
+	NAMESPACE = "NAMESPACE"
+	SELECTOR  = "SELECTOR"
 
-type Token struct {
-	Type    string
-	Literal string
-}
+	// Selector Keywords
+	FULLTEXT    = "FULLTEXT"
+	EXACT       = "EXACT"
+	EXACT_LARGE = "EXACT_LARGE"
+	RANGE       = "RANGE"
+	TERM        = "TERM"
+	TRIGRAM     = "TRIGRAM"
+)
 
 var keywords = map[string]string{
 	"type": TYPE,
 	"enum": ENUM,
 	"app":  APP,
+
+	"true":  TRUE,
+	"false": FALSE,
+
+	"namespace": NAMESPACE,
+	"selector":  SELECTOR,
+	"fulltext":  FULLTEXT,
+	"exact":     EXACT,
+	"range":     RANGE,
 }
 
 type Lexer struct {
@@ -71,7 +88,7 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
-func (l *Lexer) NextToken() (string, string) {
+func (l *Lexer) NextTokenWithLiteral() (string, string) {
 	char := l.ch
 	token := func() string {
 		switch l.ch {
@@ -145,7 +162,7 @@ func isLetter(ch byte) bool {
 }
 
 func (l *Lexer) isComment(ch byte) bool {
-	return ch == '/' && l.input[l.position+1] == '/'
+	return ch == '/' && l.input[l.position+1] == '/' || ch == '#'
 }
 
 func (l *Lexer) readComment() string {
@@ -156,5 +173,25 @@ func (l *Lexer) readComment() string {
 		if l.ch == '\n' {
 			return l.input[pos:l.position]
 		}
+	}
+}
+
+type Token struct {
+	Type    string
+	Literal string
+}
+
+func (l *Lexer) Tokens() []Token {
+	tokens := []Token{}
+	for {
+		tok, lit := l.NextTokenWithLiteral()
+		if tok == EOF {
+			return tokens
+		}
+
+		tokens = append(tokens, Token{
+			Type:    tok,
+			Literal: lit,
+		})
 	}
 }

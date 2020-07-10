@@ -14,7 +14,8 @@ type Structure struct {
 	Name        string
 	Description string
 
-	Fields []Field
+	Fields     []Field
+	Namespaces []string
 }
 
 type Form struct {
@@ -25,10 +26,13 @@ type Form struct {
 type Enum struct {
 	Name   string
 	Values []string
+	// TODO namespace enums
 }
 
 type ModelIR struct {
-	Name                     string
+	Name        string
+	Description string
+
 	EnableUniversalArchiving bool
 	EnableEventStreams       bool
 
@@ -47,9 +51,13 @@ type Field struct {
 	TypeOf    irTypes.CanonicalName
 	Primitive types.Primitive `yaml:"-"`
 
-	Selector     bool
+	Selector      bool
+	SelectorTypes []string
+
 	Optional     bool
 	DefaultValue interface{}
+
+	Namespaces []string
 }
 
 func FromFile(filename string) (ModelIR, error) {
