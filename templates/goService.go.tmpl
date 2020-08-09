@@ -29,6 +29,9 @@ type {{ $t.Name | title }}Input struct{
 }
 {{- end}}
 
+{{ $root.Forms | json }}
+{{ $root.Types | json }}
+
 {{- range $j, $t := $root.Types }}
 type {{ $t.Name | title }} struct{
 	ID uuid.UUID

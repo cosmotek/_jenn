@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -28,6 +29,14 @@ var TemplateHelperFuncs = map[string]interface{}{
 	},
 	"sprintf": func(template string, args ...interface{}) string {
 		return fmt.Sprintf(template, args...)
+	},
+	"json": func(in interface{}) string {
+		data, err := json.Marshal(in)
+		if err != nil {
+			return err.Error()
+		}
+
+		return string(data)
 	},
 }
 

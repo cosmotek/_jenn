@@ -59,6 +59,22 @@ func main() {
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Options("/rpc/v1/createUser"), func(res http.ResponseWriter, req *http.Request) {
+		input := map[string]interface{}{}
+		err := json.NewDecoder(req.Body).Decode(&input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
+		e := json.NewEncoder(os.Stdout)
+		e.SetIndent("", "\t")
+		
+		err = e.Encode(input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
 		created, err := service.CreateUser()
 		if err != nil {
 			http.Error(res, err.Error(), 500)
@@ -127,6 +143,22 @@ func main() {
 		}
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/createCocktail"), func(res http.ResponseWriter, req *http.Request) {
+		input := map[string]interface{}{}
+		err := json.NewDecoder(req.Body).Decode(&input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
+		e := json.NewEncoder(os.Stdout)
+		e.SetIndent("", "\t")
+		
+		err = e.Encode(input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
 		created, err := service.CreateCocktail()
 		if err != nil {
 			http.Error(res, err.Error(), 500)
@@ -195,6 +227,22 @@ func main() {
 		}
 	})
 	mux.HandleFunc(pat.Options("/rpc/v1/createBeverage"), func(res http.ResponseWriter, req *http.Request) {
+		input := map[string]interface{}{}
+		err := json.NewDecoder(req.Body).Decode(&input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
+		e := json.NewEncoder(os.Stdout)
+		e.SetIndent("", "\t")
+		
+		err = e.Encode(input)
+		if err != nil {
+			http.Error(res, err.Error(), 400)
+			return
+		}
+
 		created, err := service.CreateBeverage()
 		if err != nil {
 			http.Error(res, err.Error(), 500)

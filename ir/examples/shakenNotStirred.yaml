@@ -66,6 +66,8 @@ types:
     optional: false
     defaultvalue: null
 forms:
+  user:
+  - name
   beverage:
   - name
   - proof

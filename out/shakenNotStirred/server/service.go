@@ -24,11 +24,16 @@ const (
 	Wine BeverageType = "Wine"
 )
 
+type UserInput struct{
+}
 type BeverageInput struct{
 	Name string
 	Proof int
 	Type BeverageType
 }
+
+[{"Name":"user","Description":"","Fields":[],"Namespaces":null},{"Name":"beverage","Description":"","Fields":[{"Name":"name","Description":"","TypeOf":"string","Primitive":{"Nullable":false,"MaxLength":0},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"proof","Description":"","TypeOf":"number","Primitive":{"Nullable":false,"DisableNegativeValues":false,"EnableDecimal":false,"MaxValue":0},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"type","Description":"","TypeOf":"beverageType","Primitive":{"Nullable":false,"Name":"beverageType","Values":["BEER","LIQUOR","WINE"]},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null}],"Namespaces":null}]
+[{"Name":"user","Description":"","Fields":[{"Name":"firstName","Description":"","TypeOf":"name","Primitive":{"Nullable":false,"MaxLength":64},"Selector":false,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"lastName","Description":"","TypeOf":"name","Primitive":{"Nullable":false,"MaxLength":64},"Selector":false,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"joinedAt","Description":"","TypeOf":"datetime","Primitive":{},"Selector":false,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"phoneNumber","Description":"","TypeOf":"phoneNumber","Primitive":{"Nullable":false,"MaxLength":10},"Selector":false,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null}],"Namespaces":null},{"Name":"cocktail","Description":"","Fields":[{"Name":"name","Description":"","TypeOf":"string","Primitive":{"Nullable":false,"MaxLength":0},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null}],"Namespaces":null},{"Name":"beverage","Description":"","Fields":[{"Name":"name","Description":"","TypeOf":"string","Primitive":{"Nullable":false,"MaxLength":0},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"proof","Description":"","TypeOf":"number","Primitive":{"Nullable":false,"DisableNegativeValues":false,"EnableDecimal":false,"MaxValue":0},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null},{"Name":"type","Description":"","TypeOf":"beverageType","Primitive":{"Nullable":false,"Name":"beverageType","Values":["BEER","LIQUOR","WINE"]},"Selector":true,"SelectorTypes":null,"Optional":false,"DefaultValue":null,"Namespaces":null}],"Namespaces":null}]
 type User struct{
 	ID uuid.UUID
 	Archived bool
