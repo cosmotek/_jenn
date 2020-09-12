@@ -38,11 +38,13 @@ type ArtifactBundle struct {
 	Artifacts []Artifact `json:"artifacts"`
 }
 
+type AppOpts struct{}
+
 func Version() string {
 	return "0.0.0"
 }
 
-func GenerateAPI(schemaIR ir.ModelIR) (ArtifactBundle, error) {
+func GenerateAPI(schemaIR ir.ModelIR, opts AppOpts) (ArtifactBundle, error) {
 	return ArtifactBundle{}, nil
 }
 

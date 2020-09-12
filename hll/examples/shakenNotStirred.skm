@@ -12,9 +12,9 @@ type User(name, joinedAt, email, phoneNumber) {
     name: Name
     joinedAt: DateTime = Now()
     email: ?Email
-    phoneNumber: PhoneNumber
+    phoneNumber: PhoneNumber(usOnly: true)
     tags: [String]
-    canonicalID: CanonicalID @namespace(internal)
+    canonicalID: Serial @namespace(internal)
 }
 
 type Beverage {
