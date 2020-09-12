@@ -7,6 +7,7 @@ enum BeverageType {
     WINE,
 }
 
+@actor(role: standard)
 type User(name, joinedAt, email, phoneNumber) {
     # this is a description example
     name: Name

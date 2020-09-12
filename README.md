@@ -76,3 +76,18 @@ Note to self: Inspired by https://youtu.be/j6ow-UemzBc
 - Identicon
 - Pincode
 - CryptoHash (MD5, SHA, etc)
+
+### Full System Model
+
+Apps have a single endpoint
+
+Apps are comprised of the following:
+
+- Functions
+    Used to run business logic when events occur and call APIs
+- Event Streams
+    Used for auditing, as well as Functions and Service-to-Service sharing
+- APIs
+    CRUD services that provide data, validation and output events. Uni-directional flow of data (API Call -> Event)
+- Authenticators
+    Microservices that provide authentication and can link into APIs to provide authorization data. These include SMS-OTP, Email-OTL, Google, Facebook, Auth0, Apple, Github, Gitlab, LDAP, ID/Password
