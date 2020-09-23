@@ -47,6 +47,7 @@ func (p *Parser) ParseEnumBlock() error {
 
 			break
 
+		// THOUGHT: might be easier to keep commas out of row based blocks... much simpler.
 		// case lexer.COMMA:
 		// 	if !lineStarted || lineEnded {
 		// 		return fmt.Errorf("invalid enum block, unexpected token %s->'%s'", currTok.Type, currTok.Literal)
