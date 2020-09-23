@@ -186,7 +186,10 @@ func (l *Lexer) Tokens() []Token {
 	for {
 		tok, lit := l.NextTokenWithLiteral()
 		if tok == EOF {
-			return tokens
+			return append(tokens, Token{
+				Type:    tok,
+				Literal: lit,
+			})
 		}
 
 		tokens = append(tokens, Token{

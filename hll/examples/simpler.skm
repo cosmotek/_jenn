@@ -1,0 +1,20 @@
+# this file is a simple-ish example of a jenn schema for creating CRUD apps
+app ShakenNotStirred
+
+# this is a beverage
+enum BeverageType {
+    BEER
+    LIQUOR
+    WINE
+}
+
+# used to define roles
+enum UserType {
+    ADMIN
+    VUER
+    MANAGER
+    EDITOR
+    GUEST
+    # this is a comment
+    SINGLE_RESOURCE_GUEST
+}

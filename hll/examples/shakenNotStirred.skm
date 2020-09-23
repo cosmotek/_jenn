@@ -7,16 +7,17 @@ enum BeverageType {
     WINE,
 }
 
-@actor(role: standard)
-type User(name, joinedAt, email, phoneNumber) {
-    # this is a description example
-    name: Name
-    joinedAt: DateTime = Now()
-    email: ?Email
-    phoneNumber: PhoneNumber(usOnly: true)
-    tags: [String]
-    canonicalID: Serial @namespace(internal)
-}
+# @actor(role: standard)
+# type User(name, joinedAt, email, phoneNumber) {
+#     # this is a description example
+#     name: Name
+#     joinedAt: DateTime = Now()
+#     email: ?Email
+#     phoneNumber: PhoneNumber{usOnly: true}
+#     tags: [String]
+#     canonicalID: Serial @namespace(internal)
+#     collection: [Beverage]
+# }
 
 type Beverage {
     name: Name
@@ -24,7 +25,7 @@ type Beverage {
     typeOf: BeverageType
 }
 
-@namespace(internal)
+# @namespace(internal)
 type Rating {
     user: User
     rating: Number

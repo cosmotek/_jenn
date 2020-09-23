@@ -10,6 +10,16 @@ import (
 	"github.com/cosmotek/_jenn/types/registry"
 )
 
+func getKeys(in map[string]string) []string {
+	out := []string{}
+
+	for key, _ := range in {
+		out = append(out, key)
+	}
+
+	return out
+}
+
 type Structure struct {
 	Name        string
 	Description string
@@ -24,8 +34,9 @@ type Form struct {
 }
 
 type Enum struct {
-	Name   string
-	Values []string
+	Description string
+	Name        string
+	Values      map[string]string
 	// TODO namespace enums
 }
 
@@ -74,7 +85,7 @@ func FromFile(filename string) (ModelIR, error) {
 
 	reg := registry.Registry{}
 	for _, enum := range model.Enums {
-		reg.Add(enum.Name, enum.Values...)
+		reg.Add(enum.Name, getKeys(enum.Values)...)
 	}
 
 	for i, structure := range model.Types {

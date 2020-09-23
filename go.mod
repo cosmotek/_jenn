@@ -18,5 +18,6 @@ require (
 	github.com/rs/zerolog v1.19.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.1 // indirect
 	goji.io v2.0.2+incompatible // indirect
+	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
