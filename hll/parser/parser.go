@@ -44,27 +44,24 @@ func (p *Parser) Parse() (ir.ModelIR, error) {
 			return p.model, nil
 		}
 
+		var err error
 		switch tok.Type {
 		case lexer.APP:
-			err := p.ParseAppBlock()
-			if err != nil {
-				return ir.ModelIR{}, err
-			}
-
+			err = p.ParseAppBlock()
 			break
 
 		case lexer.ENUM:
-			err := p.ParseEnumBlock()
-			if err != nil {
-				return ir.ModelIR{}, err
-			}
-
+			err = p.ParseEnumBlock()
 			break
 
 		case lexer.ANNOTATION:
+			err = p.ParseAnnotation()
 			break
+
 		case lexer.TYPE:
+			err = p.ParseTypeBlock()
 			break
+
 		case lexer.COMMENT:
 			p.bufferedComments = append(p.bufferedComments, tok.Literal)
 			break
@@ -76,6 +73,11 @@ func (p *Parser) Parse() (ir.ModelIR, error) {
 		// handle any other tokens...
 		default:
 			return ir.ModelIR{}, fmt.Errorf("block starts with unacceptable token: %s->'%s'", tok.Type, tok.Literal)
+		}
+
+		// check if err
+		if err != nil {
+			return ir.ModelIR{}, err
 		}
 	}
 }
@@ -108,4 +110,12 @@ func (p *Parser) nextToken() lexer.Token {
 
 	p.position++
 	return p.tokens[p.position-1]
+}
+
+func (p *Parser) peekNextToken() lexer.Token {
+	if p.position > uint64(len(p.tokens)+1) {
+		return lexer.Token{Type: lexer.EOF}
+	}
+
+	return p.tokens[p.position]
 }
