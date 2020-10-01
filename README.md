@@ -91,3 +91,9 @@ Apps are comprised of the following:
     CRUD services that provide data, validation and output events. Uni-directional flow of data (API Call -> Event)
 - Authenticators
     Microservices that provide authentication and can link into APIs to provide authorization data. These include SMS-OTP, Email-OTL, Google, Facebook, Auth0, Apple, Github, Gitlab, LDAP, ID/Password
+
+Single endpoint, client gets manifest to determine what APIs are available, what environment to use, what version... also if sandbox is available.
+
+Staging environment / Shared Sandbox
+
+Sandbox (spun up on demand, isolated to just a single user)

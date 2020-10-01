@@ -62,24 +62,21 @@ func main() {
 	{{- "\n" }}
 	{{- range $j, $t := $root.Types }}
 	mux.HandleFunc(pat.Options("/rpc/v1/create{{ $t.Name | title }}"), func(res http.ResponseWriter, req *http.Request) {
-		input := map[string]interface{}{}
+		input := {{ $t.Name | title }}Input{}
 		err := json.NewDecoder(req.Body).Decode(&input)
 		if err != nil {
-			http.Error(res, err.Error(), 400)
+			http.Error(res, fmt.Sprintf("create{{ $.Name | title }} failed to decode input: '%s'", err.Error()), http.StatusBadRequest)
 			return
 		}
 
-		e := json.NewEncoder(os.Stdout)
-		e.SetIndent("", "\t")
-		
-		err = e.Encode(input)
+		created, err := service.Create{{ $t.Name | title }}(input)
 		if err != nil {
-			http.Error(res, err.Error(), 400)
-			return
-		}
+			hErr, ok := err.(HTTPError)
+			if ok {
+				http.Error(res, hErr.Error(), hErr.Code())
+				return
+			}
 
-		created, err := service.Create{{ $t.Name | title }}()
-		if err != nil {
 			http.Error(res, err.Error(), 500)
 			return
 		}
