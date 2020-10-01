@@ -89,6 +89,12 @@ func main() {
 			http.Error(res, err.Error(), 500)
 			return
 		}
+
+		go eventsteam.Push(Event{
+			TypeOf: Event{{ $t.Name | title }}Created,
+			ResourceID: created.ID,
+			CompletedAt: time.Now().UTC(),
+		})
 	})
 
 	{{- if $root.EnableEventStreams }}

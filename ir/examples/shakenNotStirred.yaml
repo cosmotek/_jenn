@@ -1,74 +1,49 @@
 name: shakenNotStirred
-enableuniversalarchiving: true
-enableeventstreams: true
-enums:
-- name: beverageType
-  values:
-    - BEER
-    - LIQUOR
-    - WINE
+description: ""
+enableuniversalarchiving: false
+enableeventstreams: false
 types:
 - name: user
   description: ""
   fields:
-  - name: firstName
-    description: ""
-    typeof: name
-    selector: false
-    optional: false
-    defaultvalue: null
   - name: lastName
     description: ""
     typeof: name
     selector: false
+    selectortypes: []
     optional: false
     defaultvalue: null
+    namespaces: []
+  - name: lastName
+    description: ""
+    typeof: name
+    selector: false
+    selectortypes: []
+    optional: false
+    defaultvalue: null
+    namespaces: []
   - name: joinedAt
     description: ""
     typeof: datetime
     selector: false
+    selectortypes: []
     optional: false
     defaultvalue: null
+    namespaces: []
   - name: phoneNumber
     description: ""
     typeof: phoneNumber
     selector: false
+    selectortypes: []
     optional: false
     defaultvalue: null
-- name: cocktail
-  description: ""
-  fields:
-  - name: name
-    description: ""
-    typeof: string
-    selector: true
-    optional: false
-    defaultvalue: null
-- name: beverage
-  description: ""
-  fields:
-  - name: name
-    description: ""
-    typeof: string
-    selector: true
-    optional: false
-    defaultvalue: null
-  - name: proof
-    description: ""
-    typeof: number
-    selector: true
-    optional: false
-    defaultvalue: null
-  - name: type
-    description: ""
-    typeof: beverageType
-    selector: true
-    optional: false
-    defaultvalue: null
-forms:
-  user:
-  - name
-  beverage:
-  - name
-  - proof
-  - type
+    namespaces: []
+  namespaces: []
+enums:
+- description: Type of drink
+  name: DrinkType
+  values:
+    beer: for partying
+    liquor: a high-proof for mixing
+    wine: ""
+forms: {}
