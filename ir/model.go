@@ -46,6 +46,7 @@ type ModelIR struct {
 
 	EnableUniversalArchiving bool
 	EnableEventStreams       bool
+	EnableSerialIDs          bool
 
 	Types []Structure
 	Enums []Enum

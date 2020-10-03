@@ -9,6 +9,12 @@ Go web service generators
 
 Note to self: Inspired by https://youtu.be/j6ow-UemzBc
 
+### future improvements
+
+// todo filter out fields by namespace
+// todo use generated JSON stubs for perf improvements
+
+
 ### Things to look into
 - PostgREST
 - Stitch

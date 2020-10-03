@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -17,12 +17,14 @@ var outputs = map[string]string{
 }
 
 func main() {
+	outputDir := *flag.String("o", "out/demo", "")
+
 	model, err := ir.FromFile("ir/examples/shakenNotStirred.yaml")
 	if err != nil {
 		panic(err)
 	}
 
-	err = os.MkdirAll(fmt.Sprintf("out/%s", model.Name), os.ModePerm)
+	err = os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +40,7 @@ func main() {
 			panic(err)
 		}
 
-		fullFilepath := filepath.Join(fmt.Sprintf("out/%s", model.Name), filename)
+		fullFilepath := filepath.Join(outputDir, filename)
 		err = os.MkdirAll(filepath.Dir(fullFilepath), os.ModePerm)
 		if err != nil {
 			panic(err)

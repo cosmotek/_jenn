@@ -3,15 +3,20 @@ package main
 import (
 	"context"
 	"time"
+	"net/http"
 
 	"github.com/cosmotek/pgdb"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/cosmotek/_jenn/libs/httperr"
+	"github.com/cosmotek/_jenn/libs/page"
 )
+
+// var dialect = goqu.Dialect("postgres")
 
 type ServiceInstance struct{
 	Context context.Context
-	DB *pgdb.Database
+	*pgdb.Database
 }
 {{- "\n" }}
 {{- $root := . }}
@@ -29,73 +34,136 @@ type {{ $t.Name | title }}Input struct{
 }
 {{- end}}
 
-{{ $root.Forms | json }}
-{{ $root.Types | json }}
-
 {{- range $j, $t := $root.Types }}
-type {{ $t.Name | title }} struct{
-	ID uuid.UUID
-	{{- if $root.EnableUniversalArchiving }}
-	Archived bool
-	{{- end }}
+type {{ $t.Name | title }}Input struct{
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
 	{{ $e.Name | title }} {{ $e.Primitive.GoType }}
 	{{- end }}
 }
 
+type {{ $t.Name | title }} struct{
+	ID uuid.UUID `db:"id" json:"id"`
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{ $e.Name | title }} {{ $e.Primitive.GoType }} `db:"{{ $e.Name }}" json:"{{ $e.Name }}"`
+	{{- end }}
+	{{- if $root.EnableUniversalArchiving }}
+	Archived bool `db:"archived" json:"archived"`
+	{{- end }}
+}
+
 const {{ $t.Name }}CreateQueryStr = `
-INSERT INTO {{ $t.Name }} (
+INSERT INTO {{ $t.Name | quotes }} (
 	"id",
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
 	{{ $e.Name | quotes }}{{ if last $i $f }}{{ else }},{{ end }}
 	{{- end }}
 ) VALUES (
-	$1,
+	:id,
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
-	{{ "$" }}{{ $i | incr | incr }}{{ if last $i $f }}{{ else }},{{ end }}
+	:{{ $e.Name }}{{ if last $i $f }}{{ else }},{{ end }}
 	{{- end }}
 );
 `
 
-func (s *ServiceInstance) Create{{ $t.Name | title }}() ({{ $t.Name | title }}, error) {
-	input := {{ $t.Name | title }}{
+func (s *ServiceInstance) Create{{ $t.Name | title }}(input {{ $t.Name | title }}Input) ({{ $t.Name | title }}, *httperr.HTTPError) {
+	// {{- range $i, $f := $t.Fields }}
+	// {{- if $f.Optional }}
+
+	// {{- end }}
+	// {{- end }}
+	
+	newResource := {{ $t.Name | title }}{
 		ID: uuid.New(),
 		{{- if $root.EnableUniversalArchiving }}
 		Archived: false,
 		{{- end }}
 		{{- range $i, $f := $t.Fields }}
-		{{ $f.Name | title }}: {{ $f.Primitive.GoTypeZeroValueLiteral }},
+		{{ $f.Name | title }}: input.{{ $f.Name | title }},
 		{{- end }}
 	}
 	
-	err := s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
-		_, err := tx.Exec({{ $t.Name }}CreateQueryStr,{{" "}}{{range $i, $e := $f }}input.{{ $e.Name | title }}{{ if last $i $f }}{{ else }}, {{ end }}{{- end }})
+	err := s.Update(s.Context, func(tx *sqlx.Tx) error {
+		_, err := tx.NamedExec({{ $t.Name }}CreateQueryStr, newResource)
 		return err
 	})
 	if err != nil {
-		return {{ $t.Name | title }}{}, err
+		return {{ $t.Name | title }}{}, httperr.New(err, http.StatusInternalServerError)
 	}
 	
-	return {{ $t.Name | title }}{}, nil
+	return newResource, nil
 }
 
+type {{ $t.Name | title }}Query struct{
+	ID *string `db:"id" json:"id"`
+	{{- $f := $t.Fields }}
+	{{- range $i, $e := $f }}
+	{{- if $e.Selector }}
+	{{ $e.Name | title }} *{{ $e.Primitive.GoType }}
+	{{- end}}
+	{{- end }}
+}
+
+func (s *ServiceInstance) Get{{ $t.Name | title }}(queryInput {{ $t.Name | title }}Query) ({{ $t.Name | title }}, *httperr.HTTPError) {
+	// {{- range $i, $f := $t.Fields }}
+	// {{- if $f.Optional }}
+
+	// {{- end }}
+	// {{- end }}
+
+	// query, _, err := 
+
+	resource := {{ $t.Name | title }}{}
+	err := s.View(s.Context, func(tx *sqlx.Tx) error {
+		return tx.Get(&resource, `select * from {{ $t.Name | quotes }} where id = $1`, queryInput.ID)
+	})
+	if err != nil {
+		return {{ $t.Name | title }}{}, httperr.New(err, http.StatusInternalServerError)
+	}
+	
+	return resource, nil
+}
+
+func (s *ServiceInstance) GetAll{{ $t.Name | title }}s(pagination page.PageInput) (page.Page, []{{ $t.Name | title }}, *httperr.HTTPError) {
+	// {{- range $i, $f := $t.Fields }}
+	// {{- if $f.Optional }}
+
+	// {{- end }}
+	// {{- end }}
+
+	// query, _, err := 
+
+	pageMeta := page.Page{}
+	resources := []{{ $t.Name | title }}{}
+
+	err := s.View(s.Context, func(tx *sqlx.Tx) error {
+		return tx.Select(&resources, `select * from {{ $t.Name | quotes }} limit 100`)
+	})
+	if err != nil {
+		return page.Page{}, []{{ $t.Name | title }}{}, httperr.New(err, http.StatusInternalServerError)
+	}
+	
+	return pageMeta, resources, nil
+}
+
+
 {{- "\n" }}
-{{- if $root.EnableUniversalArchiving }}
-func (s *ServiceInstance) Archive{{ $t.Name | title }}(id string) error {
-	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
-		_, err := tx.Exec("UPDATE {{ $t.Name}} SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
-		return err
-	})
-}
-{{- else }}
-func (s *ServiceInstance) Delete{{ $t.Name | title }}(id string) error {
-	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
-		_, err := tx.Exec("DELETE FROM {{ $t.Name}} WHERE \"id\" = $1", id)
-		return err
-	})
-}
-{{- end }}
+// {{- if $root.EnableUniversalArchiving }}
+// func (s *ServiceInstance) Archive{{ $t.Name | title }}(id string) error {
+// 	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+// 		_, err := tx.Exec("UPDATE {{ $t.Name}} SET \"_archived\" = TRUE WHERE \"id\" = $1", id)
+// 		return err
+// 	})
+// }
+// {{- else }}
+// func (s *ServiceInstance) Delete{{ $t.Name | title }}(id string) error {
+// 	return s.DB.Update(s.Context, func(tx *sqlx.Tx) error {
+// 		_, err := tx.Exec("DELETE FROM {{ $t.Name}} WHERE \"id\" = $1", id)
+// 		return err
+// 	})
+// }
+// {{- end }}
 {{- end }}

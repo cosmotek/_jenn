@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	data, err := ioutil.ReadFile("hll/examples/simpler.skm")
+	data, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		panic(err)
 	}

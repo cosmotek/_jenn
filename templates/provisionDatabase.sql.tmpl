@@ -1,24 +1,30 @@
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- todo check for use of extensions and enable them
+
 {{- $root := . }}
 {{- range $j, $t := $root.Types }}
 CREATE TABLE {{ $t.Name | quotes }} (
 	"id" UUID PRIMARY KEY,
 	{{- if $root.EnableUniversalArchiving }}
-	"_archived" BOOLEAN NOT NULL DEFAULT FALSE,
+	"archived" BOOLEAN NOT NULL DEFAULT FALSE,
 	{{- end }}
 	{{- $f := $t.Fields }}
 	{{- range $i, $e := $f }}
 	{{ $e.Name | quotes }} {{ $e.Primitive.SQLType }}{{ if last $i $f }}{{ else }},{{ end }}
 	{{- end }}
 );
-{{ "\n" }}
+{{ "" }}
+{{- if $root.EnableUniversalArchiving }}
+CREATE INDEX idx_{{ $t.Name }}_archived ON {{ $t.Name | quotes }} USING btree ("archived");
+{{- end }}
+{{ "" }}
 {{- $f := $t.Fields }}
 {{- range $i, $e := $f }}
 {{- if $e.Selector }}
 CREATE INDEX index_{{ $t.Name }}_on_{{ $e.Name }}_trigram
 ON {{ $t.Name | quotes }}
 USING {{ $e.Primitive.SQLIndexType $e.Name }};
-{{ "\n" }}
+{{ "" }}
 {{- end }}
 {{- end }}
 {{- end }}
+-- TODO add support for index types
