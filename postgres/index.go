@@ -33,3 +33,7 @@ type Index struct {
 
 	// TODO support multifield indexes
 }
+
+func (i Index) ToSQL() string {
+	return ""
+}
