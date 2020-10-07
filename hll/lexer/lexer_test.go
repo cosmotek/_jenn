@@ -78,7 +78,7 @@ type tokenTest struct {
 }
 
 var nextTokenTests = map[string]tokenTest{
-	"basic test": tokenTest{
+	"basic test": {
 		Input: `
 app ShakenNotStirred
 
@@ -141,48 +141,6 @@ type Beverage {
 			EOF,
 		},
 	},
-	"complex test": tokenTest{
-		Input: `
-# I want to test out app descriptions
-# so this is a multiline comment
-# I wonder if this will work
-
-# going to test a line of separation
-
-app ShakenNotStirred
-
-enum BeverageType {
-	BEER,
-	LIQUOR,
-	WINE,
-}
-
-type User(name, joinedAt, email, phoneNumber) {
-	// this is a description example
-	name: Name
-	joinedAt: DateTime = Now()
-	email: ?Email
-	phoneNumber: PhoneNumber
-	tags: [String]
-	canonicalID: CanonicalID @namespace(internal)
-	canAccessLegacy: Bool = true
-}
-
-type Beverage {
-	# comments can use hash symbols too!
-	name: Name
-	proof: Number
-	type: BeverageType
-}
-
-@namespace(internal)
-type Rating {
-	user: User
-	rating: Number
-}		
-`,
-		ExpectedTokens: []string{},
-	},
 }
 
 func TestNextToken(t *testing.T) {
@@ -205,10 +163,56 @@ func TestNextToken(t *testing.T) {
 				}
 			}
 
-			printTable(test.ExpectedTokens, tokens, literals)
-
 			if !cmp.Equal(tokens, test.ExpectedTokens) {
+				printTable(test.ExpectedTokens, tokens, literals)
 				t.Error(cmp.Diff(tokens, test.ExpectedTokens))
+			}
+		})
+	}
+}
+
+type lineCountTest struct {
+	Input         string
+	ExpectedLines int
+}
+
+var lineCountTests = map[string]lineCountTest{
+	"basic test": {
+		Input: `app ShakenNotStirred
+
+// enums are cool
+enum BeverageType {
+	BEER,
+	LIQUOR,
+	WINE,
+}
+
+type Beverage {
+	name: ?Name
+	proof: Number
+	typeOf: BeverageType
+}
+`,
+		ExpectedLines: 14,
+	},
+}
+
+func TestLineCounts(t *testing.T) {
+	for name, test := range lineCountTests {
+		lex := New(test.Input)
+
+		t.Run(name, func(it *testing.T) {
+			// for {
+			// 	tok, _ := lex.NextTokenWithLiteral()
+			// 	if tok == EOF {
+			// 		break
+			// 	}
+			// }
+
+			t.Logf("%v", lex.Tokens())
+
+			if !cmp.Equal(lex.LineCount(), test.ExpectedLines) {
+				t.Error(cmp.Diff(lex.LineCount(), test.ExpectedLines))
 			}
 		})
 	}

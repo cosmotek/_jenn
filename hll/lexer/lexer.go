@@ -64,10 +64,13 @@ var keywords = map[string]string{
 }
 
 type Lexer struct {
-	input        string
-	position     int
-	readPosition int
-	ch           byte
+	input           string
+	position        int
+	readPosition    int
+	lineCount       int
+	lineTerminating bool
+	rowCount        int
+	ch              byte
 }
 
 func New(input string) *Lexer {
@@ -86,15 +89,24 @@ func (l *Lexer) readChar() {
 
 	l.position = l.readPosition
 	l.readPosition += 1
+	l.rowCount++
 }
 
 func (l *Lexer) NextTokenWithLiteral() (string, string) {
+	if l.lineTerminating && l.ch != 0 {
+		l.lineCount++
+		l.rowCount = 0
+
+		l.lineTerminating = false
+	}
+
 	char := l.ch
 	token := func() string {
 		switch l.ch {
 		case ' ':
 			return SPACE
 		case '\n':
+			l.lineTerminating = true
 			return NEWLINE
 		case '\t':
 			return TAB
@@ -179,6 +191,9 @@ func (l *Lexer) readComment() string {
 type Token struct {
 	Type    string
 	Literal string
+
+	Line int
+	Row  int
 }
 
 func (l *Lexer) Tokens() []Token {
@@ -189,12 +204,20 @@ func (l *Lexer) Tokens() []Token {
 			return append(tokens, Token{
 				Type:    tok,
 				Literal: lit,
+				Line:    l.lineCount,
+				Row:     l.rowCount,
 			})
 		}
 
 		tokens = append(tokens, Token{
 			Type:    tok,
 			Literal: lit,
+			Line:    l.lineCount,
+			Row:     l.rowCount,
 		})
 	}
+}
+
+func (l Lexer) LineCount() int {
+	return l.lineCount + 1
 }
