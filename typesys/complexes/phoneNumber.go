@@ -1,13 +1,13 @@
 package complexes
 
 import (
-	"github.com/cosmotek/_jenn/types"
-	"github.com/cosmotek/_jenn/types/primitives"
+	"github.com/cosmotek/_jenn/typesys"
+	"github.com/cosmotek/_jenn/typesys/primitives"
 )
 
 type PhoneNumber struct{}
 
-func (p PhoneNumber) PrimitiveRoot() types.Primitive {
+func (p PhoneNumber) PrimitiveRoot() typesys.Primitive {
 	return primitives.String{
 		Nullable:  false,
 		MaxLength: 10,

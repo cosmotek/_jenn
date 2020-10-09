@@ -1,3 +1,3 @@
-package types
+package typesys
 
 type Validator struct{}

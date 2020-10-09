@@ -3,10 +3,9 @@ package types
 import (
 	"fmt"
 
-	"github.com/cosmotek/_jenn/types"
-	"github.com/cosmotek/_jenn/types/complexes"
-	"github.com/cosmotek/_jenn/types/primitives"
-	"github.com/cosmotek/_jenn/types/registry"
+	types "github.com/cosmotek/_jenn/typesys"
+	"github.com/cosmotek/_jenn/typesys/complexes"
+	"github.com/cosmotek/_jenn/typesys/primitives"
 )
 
 type CanonicalName string
@@ -33,22 +32,22 @@ var comps = map[CanonicalName]types.Complex{
 	PhoneNumber: complexes.PhoneNumber{},
 }
 
-func ResolvePrimitive(reg registry.Registry, typeOf CanonicalName) (types.Primitive, []string, error) {
-	primitive, ok := prims[typeOf]
-	if ok {
-		typeTemplates, err := primitive.ExecTemplates()
-		if err != nil {
-			return nil, nil, err
-		}
+func ResolvePrimitive(typeOf CanonicalName) (types.Primitive, []string, error) {
+	// primitive, ok := prims[typeOf]
+	// if ok {
+	// 	typeTemplates, err := primitive.ExecTemplates()
+	// 	if err != nil {
+	// 		return nil, nil, err
+	// 	}
 
-		blocks := []string{}
-		if typeTemplates != "" {
-			blocks = append(blocks, typeTemplates)
-		}
+	// 	blocks := []string{}
+	// 	if typeTemplates != "" {
+	// 		blocks = append(blocks, typeTemplates)
+	// 	}
 
-		return primitive, blocks, nil
+	// 	return primitive, blocks, nil
 
-	}
+	// }
 
 	complex, ok := comps[typeOf]
 	if ok {
@@ -65,15 +64,16 @@ func ResolvePrimitive(reg registry.Registry, typeOf CanonicalName) (types.Primit
 		return complex.PrimitiveRoot(), blocks, nil
 	}
 
-	enum, exists := reg.FindEnum(string(typeOf))
-	if !exists {
-		return nil, nil, fmt.Errorf("unable to resolve type or enum: '%s'", string(typeOf))
-	}
+	// enum, exists := reg.FindEnum(string(typeOf))
+	// if !exists {
+	// 	return nil, nil, fmt.Errorf("unable to resolve type or enum: '%s'", string(typeOf))
+	// }
 
-	typeTemplates, err := enum.ExecTemplates()
-	if err != nil {
-		return nil, nil, err
-	}
+	// typeTemplates, err := enum.ExecTemplates()
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
 
-	return enum, []string{typeTemplates}, nil
+	// return enum, []string{typeTemplates}, nil
+	return nil, nil, fmt.Errorf("unable to resolve type or enum: '%s'", string(typeOf))
 }

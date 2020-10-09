@@ -1,5 +1,7 @@
 package postgres
 
+import "fmt"
+
 type Type struct {
 	Literal string
 }
@@ -37,3 +39,9 @@ var (
 		Literal: "float",
 	}
 )
+
+func VarChar(len uint64) Type {
+	return Type{
+		Literal: fmt.Sprintf("VARCHAR(%d)", len),
+	}
+}

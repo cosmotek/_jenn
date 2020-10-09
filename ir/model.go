@@ -5,9 +5,9 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	irTypes "github.com/cosmotek/_jenn/ir/types"
-	"github.com/cosmotek/_jenn/types"
-	"github.com/cosmotek/_jenn/types/registry"
+	"github.com/cosmotek/_jenn/ir/types"
+	"github.com/cosmotek/_jenn/typesys"
+	// "github.com/cosmotek/_jenn/types/registry"
 )
 
 func getKeys(in map[string]string) []string {
@@ -60,8 +60,8 @@ type Field struct {
 	Name        string
 	Description string
 
-	TypeOf    irTypes.CanonicalName
-	Primitive types.Primitive `yaml:"-"`
+	TypeOf    types.CanonicalName
+	Primitive typesys.Primitive `yaml:"-"`
 
 	Selector      bool
 	SelectorTypes []string
@@ -84,14 +84,14 @@ func FromFile(filename string) (ModelIR, error) {
 		return ModelIR{}, err
 	}
 
-	reg := registry.Registry{}
-	for _, enum := range model.Enums {
-		reg.Add(enum.Name, getKeys(enum.Values)...)
-	}
+	// reg := registry.Registry{}
+	// for _, enum := range model.Enums {
+	// 	reg.Add(enum.Name, getKeys(enum.Values)...)
+	// }
 
 	for i, structure := range model.Types {
 		for j, field := range structure.Fields {
-			prim, typeBlocks, err := irTypes.ResolvePrimitive(reg, field.TypeOf)
+			prim, typeBlocks, err := types.ResolvePrimitive(field.TypeOf)
 			if err != nil {
 				return ModelIR{}, err
 			}
