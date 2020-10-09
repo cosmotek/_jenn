@@ -197,22 +197,37 @@ type Beverage {
 	},
 }
 
-func TestLineCounts(t *testing.T) {
+func TestLineCountsAndColumnBounds(t *testing.T) {
 	for name, test := range lineCountTests {
 		lex := New(test.Input)
 
 		t.Run(name, func(it *testing.T) {
-			// for {
-			// 	tok, _ := lex.NextTokenWithLiteral()
-			// 	if tok == EOF {
-			// 		break
-			// 	}
-			// }
+			tok := lex.Tokens()
 
-			t.Logf("%v", lex.Tokens())
+			// counter for column
+			cols := 1
+
+			for _, token := range tok {
+				if token.Type == EOF {
+					return
+				} else if token.Type == TAB {
+					cols += 4
+				} else {
+					cols += len(token.Literal)
+				}
+
+				if cols != token.ColumnEnd {
+					it.Errorf("token literal '%s'->%s expected column %d but got %d", token.Literal, token.Type, cols, token.ColumnEnd)
+				}
+
+				// reset counter
+				if token.Type == NEWLINE {
+					cols = 1
+				}
+			}
 
 			if !cmp.Equal(lex.LineCount(), test.ExpectedLines) {
-				t.Error(cmp.Diff(lex.LineCount(), test.ExpectedLines))
+				it.Error(cmp.Diff(lex.LineCount(), test.ExpectedLines))
 			}
 		})
 	}

@@ -69,6 +69,7 @@ type Lexer struct {
 	readPosition    int
 	lineCount       int
 	lineTerminating bool
+	tabTerminating  bool
 	rowCount        int
 	ch              byte
 }
@@ -95,10 +96,15 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextTokenWithLiteral() (string, string) {
 	if l.lineTerminating && l.ch != 0 {
 		l.lineCount++
-		l.rowCount = 0
+		l.rowCount = 1
 
 		l.lineTerminating = false
 	}
+
+	// if l.tabTerminating && l.ch != 0 {
+	// 	 4
+	// 	l.tabTerminating = false
+	// }
 
 	char := l.ch
 	token := func() string {
@@ -109,6 +115,8 @@ func (l *Lexer) NextTokenWithLiteral() (string, string) {
 			l.lineTerminating = true
 			return NEWLINE
 		case '\t':
+			// l.tabTerminating = true
+			l.rowCount += 3
 			return TAB
 		case '=':
 			return ASSIGN
@@ -192,8 +200,9 @@ type Token struct {
 	Type    string
 	Literal string
 
-	Line int
-	Row  int
+	Line        int
+	ColumnStart int
+	ColumnEnd   int
 }
 
 func (l *Lexer) Tokens() []Token {
@@ -204,16 +213,21 @@ func (l *Lexer) Tokens() []Token {
 			return append(tokens, Token{
 				Type:    tok,
 				Literal: lit,
-				Line:    l.lineCount,
-				Row:     l.rowCount,
+				Line:    l.lineCount + 1,
 			})
 		}
 
+		padding := 0
+		if tok == TAB {
+			padding += 3
+		}
+
 		tokens = append(tokens, Token{
-			Type:    tok,
-			Literal: lit,
-			Line:    l.lineCount,
-			Row:     l.rowCount,
+			Type:        tok,
+			Literal:     lit,
+			Line:        l.lineCount + 1,
+			ColumnStart: l.rowCount - (len(lit) + padding),
+			ColumnEnd:   l.rowCount,
 		})
 	}
 }
