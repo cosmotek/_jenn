@@ -72,7 +72,7 @@ func (p *Parser) Parse() (ir.ModelIR, error) {
 
 		// handle any other tokens...
 		default:
-			return ir.ModelIR{}, fmt.Errorf("block starts with unacceptable token: %s->'%s'", tok.Type, tok.Literal)
+			return ir.ModelIR{}, fmt.Errorf("%d:%d: expected declaration, found '%s'", tok.Line, tok.ColumnStart, tok.Literal)
 		}
 
 		// check if err

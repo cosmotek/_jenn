@@ -11,7 +11,8 @@ import (
 )
 
 func main() {
-	data, err := ioutil.ReadFile(os.Args[1])
+	filename := os.Args[1]
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +22,8 @@ func main() {
 
 	output, err := psr.Parse()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("%s:%s\n", filename, err.Error())
+		os.Exit(1)
 	}
 
 	// jsonStr, err := psr.JSON()

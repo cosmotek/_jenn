@@ -20,4 +20,7 @@ enum UserType {
 }
 
 # this is an example type
-type User(name,email,gender,age) {}
+type User(name, email, gender, age) {
+    name: String
+    email: Email
+}

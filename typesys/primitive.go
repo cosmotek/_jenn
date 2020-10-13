@@ -34,3 +34,5 @@ type Primitive interface {
 	// used to load custom functions
 	Plugins() []Plugin
 }
+
+// TODO break into simpler set of interfaces
