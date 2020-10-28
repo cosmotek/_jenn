@@ -67,6 +67,7 @@ type Field struct {
 	SelectorTypes []string
 
 	Optional     bool
+	ArrayList    bool
 	DefaultValue interface{}
 
 	Namespaces []string

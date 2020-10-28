@@ -22,5 +22,18 @@ enum UserType {
 # this is an example type
 type User(name, email, gender, age) {
     name: String
-    email: Email
+    phoneNumber: PhoneNumber
+    email: ?Email
+    avatar: ?AvatarImage
+    joindAt: DateTime = Now()
+
+    notificationsEnabled: Boolean = true
+    timezone: Timezone = Timezones.UTC
+    proUser: Boolean = this.email
+    prefix: String = this.email ? 'mr' : 'mrs'
+}
+
+type App(name) {
+    name: String
+    schema: Schema
 }

@@ -98,6 +98,7 @@ func (p *Parser) ParseTypeBlock() error {
 		}
 	}
 
+	typeComments := strings.Join(p.flushBufferedComments(), "\n")
 	fields := []ir.Field{}
 
 	// look for fields
@@ -116,37 +117,90 @@ func (p *Parser) ParseTypeBlock() error {
 				return fmt.Errorf("%d:%d: expected separator ':', found illegal '%s'", sep.Line, sep.ColumnStart, sep.Literal)
 			}
 
-			spaceOrType := p.nextToken()
-			typeOfSpaceOrType := spaceOrType.Type
-			if typeOfSpaceOrType != lexer.SPACE && typeOfSpaceOrType != lexer.IDENT {
-				return fmt.Errorf("%d:%d: expected type name (ident), found illegal '%s'", spaceOrType.Line, spaceOrType.ColumnStart, spaceOrType.Literal)
+			next := p.nextToken()
+			if next.Type == lexer.SPACE {
+				next = p.nextToken()
 			}
 
-			typeName := spaceOrType.Literal
-			if typeOfSpaceOrType == lexer.SPACE {
-				typeTok := p.nextToken()
-				typeOfSpaceOrType := typeTok.Type
-				if typeOfSpaceOrType != lexer.SPACE && typeOfSpaceOrType != lexer.IDENT {
-					return fmt.Errorf("%d:%d: expected type name (ident), found illegal '%s'", typeTok.Line, typeTok.ColumnStart, typeTok.Literal)
+			typeName := ""
+			optional := false
+			array := false
+
+			if next.Type == lexer.NULLABLE {
+				optional = true
+				next = p.nextToken()
+			}
+
+			if next.Type == lexer.LBRACKET {
+				next = p.nextToken()
+				if next.Type == lexer.IDENT {
+					typeName = next.Literal
+					next = p.nextToken()
+				} else {
+					return fmt.Errorf("%d:%d: expected type name (ident), found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
 				}
 
-				typeName = typeTok.Literal
+				if next.Type == lexer.RBRACKET {
+					array = true
+					next = p.nextToken()
+				} else {
+					return fmt.Errorf("%d:%d: expected rbracket, found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
+				}
+			} else if next.Type == lexer.IDENT {
+				typeName = next.Literal
+			} else {
+				return fmt.Errorf("%d:%d: expected type name (ident), found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
 			}
+
+			expression := ""
+			expressionStarted := false
 
 			for {
 				next := p.nextToken()
-				if next.Type == lexer.NEWLINE {
+				if next.Type == lexer.RBRACE {
+					var exp interface{}
+					if expressionStarted {
+						exp = fmt.Sprintf("expression('%s')", strings.TrimSpace(expression))
+					}
+
 					fields = append(fields, ir.Field{
-						Name:        fieldName,
-						TypeOf:      types.CanonicalName(typeName), // todo resolve
-						Description: strings.Join(p.flushBufferedComments(), "\n"),
+						Name:         fieldName,
+						TypeOf:       types.CanonicalName(typeName), // TODO resolve
+						Description:  strings.Join(p.flushBufferedComments(), "\n"),
+						Optional:     optional,
+						ArrayList:    array,
+						DefaultValue: exp,
+					})
+
+					goto assembleType
+				}
+
+				if next.Type == lexer.NEWLINE || next.Type == lexer.RBRACE {
+					var exp interface{}
+					if expressionStarted {
+						exp = fmt.Sprintf("expression('%s')", strings.TrimSpace(expression))
+					}
+
+					fields = append(fields, ir.Field{
+						Name:         fieldName,
+						TypeOf:       types.CanonicalName(typeName), // TODO resolve
+						Description:  strings.Join(p.flushBufferedComments(), "\n"),
+						Optional:     optional,
+						ArrayList:    array,
+						DefaultValue: exp,
 					})
 
 					break
 				}
 
-				if next.Type != lexer.SPACE && next.Type != lexer.TAB {
-					return fmt.Errorf("%d:%d: expected newline, found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
+				if !expressionStarted {
+					if next.Type == lexer.ASSIGN {
+						expressionStarted = true
+					} else if next.Type != lexer.SPACE && next.Type != lexer.TAB {
+						return fmt.Errorf("%d:%d: expected newline, found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
+					}
+				} else {
+					expression += next.Literal
 				}
 			}
 		case lexer.COMMENT:
@@ -155,9 +209,11 @@ func (p *Parser) ParseTypeBlock() error {
 		case lexer.TAB, lexer.SPACE, lexer.NEWLINE:
 			break
 		default:
-			return fmt.Errorf("%d:%d: expected field, found illegal '%s'", currTok.Line, currTok.ColumnStart, currTok.Literal)
+			return fmt.Errorf("%d:%d: expected field, found illegal '%s' (%s)", currTok.Line, currTok.ColumnStart, currTok.Literal, currTok.Type)
 		}
 	}
+
+assembleType:
 
 	// add form fields to model
 	formFieldIR := []ir.Field{}
@@ -175,7 +231,7 @@ func (p *Parser) ParseTypeBlock() error {
 
 	// add type to model
 	p.model.Types = append(p.model.Types, ir.Structure{
-		Description: strings.Join(p.flushBufferedComments(), "\n"),
+		Description: typeComments,
 		Name:        typeName + strings.Join(formFields, ","),
 		Fields:      fields,
 		//Fields

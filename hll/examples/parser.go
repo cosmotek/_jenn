@@ -1,13 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 
 	"github.com/cosmotek/_jenn/hll/lexer"
 	"github.com/cosmotek/_jenn/hll/parser"
+
+	pjson "github.com/hokaccha/go-prettyjson"
 )
 
 func main() {
@@ -26,10 +27,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// jsonStr, err := psr.JSON()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	jsonData, err := pjson.Marshal(output)
+	if err != nil {
+		fmt.Printf("%s:%s\n", filename, err.Error())
+		os.Exit(1)
+	}
 
-	json.NewEncoder(os.Stdout).Encode(output)
+	fmt.Println(string(jsonData))
 }
