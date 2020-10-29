@@ -18,6 +18,7 @@ const (
 	NULLABLE   = "NULLABLE"
 	ANNOTATION = "ANNOTATION"
 	COMMENT    = "COMMENT"
+	OR         = "OR"
 
 	// Delimiters
 	COMMA   = "COMMA"
@@ -38,6 +39,7 @@ const (
 	APP       = "APP"
 	NAMESPACE = "NAMESPACE"
 	SELECTOR  = "SELECTOR"
+	UNION     = "UNION"
 
 	// Selector Keywords
 	FULLTEXT    = "FULLTEXT"
@@ -49,9 +51,10 @@ const (
 )
 
 var keywords = map[string]string{
-	"type": TYPE,
-	"enum": ENUM,
-	"app":  APP,
+	"type":  TYPE,
+	"enum":  ENUM,
+	"app":   APP,
+	"union": UNION,
 
 	"true":  TRUE,
 	"false": FALSE,
@@ -118,6 +121,8 @@ func (l *Lexer) NextTokenWithLiteral() (string, string) {
 			// l.tabTerminating = true
 			l.rowCount += 3
 			return TAB
+		case '|':
+			return OR
 		case '=':
 			return ASSIGN
 		case ',':

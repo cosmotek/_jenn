@@ -157,6 +157,7 @@ func (p *Parser) ParseTypeBlock() error {
 
 			for {
 				next := p.nextToken()
+
 				if next.Type == lexer.RBRACE {
 					var exp interface{}
 					if expressionStarted {
@@ -172,10 +173,10 @@ func (p *Parser) ParseTypeBlock() error {
 						DefaultValue: exp,
 					})
 
-					goto assembleType
+					break
 				}
 
-				if next.Type == lexer.NEWLINE || next.Type == lexer.RBRACE {
+				if next.Type == lexer.NEWLINE {
 					var exp interface{}
 					if expressionStarted {
 						exp = fmt.Sprintf("expression('%s')", strings.TrimSpace(expression))
@@ -197,10 +198,14 @@ func (p *Parser) ParseTypeBlock() error {
 					if next.Type == lexer.ASSIGN {
 						expressionStarted = true
 					} else if next.Type != lexer.SPACE && next.Type != lexer.TAB {
-						return fmt.Errorf("%d:%d: expected newline, found illegal '%s'", next.Line, next.ColumnStart, next.Literal)
+						return fmt.Errorf("%d:%d: expected newline, found illegal '%s' (%s)", next.Line, next.ColumnStart, next.Literal, next.Type)
 					}
 				} else {
 					expression += next.Literal
+				}
+
+				if p.peekNextToken().Type == lexer.IDENT {
+					break
 				}
 			}
 		case lexer.COMMENT:
@@ -212,8 +217,6 @@ func (p *Parser) ParseTypeBlock() error {
 			return fmt.Errorf("%d:%d: expected field, found illegal '%s' (%s)", currTok.Line, currTok.ColumnStart, currTok.Literal, currTok.Type)
 		}
 	}
-
-assembleType:
 
 	// add form fields to model
 	formFieldIR := []ir.Field{}

@@ -1,13 +1,68 @@
 # this file is a simple-ish example of a jenn schema for creating CRUD apps
 app ShakenNotStirred
 
-type Beverage {
+enum UnitOfMeasurement {
+    OUNCE
+    TEASPOON
+}
 
+union IngredientItem = Spirit | Herb | Juice | Beverage
+
+type Ingredient {
+    amount: Float
+    unit: UnitOfMeasurement
+    optional: Boolean
+    product: IngredientItem
+}
+
+type Juice {
+    name: String
+    previewImage: URL
+    msrp: CurrencyUSD
+    description: ?String
+}
+
+type Beverage {
+    name: String
+    previewImage: URL
+    msrp: CurrencyUSD
+    description: ?String
+}
+
+type Spice {
+    name: String
+    previewImage: URL
+    msrp: CurrencyUSD
+    description: ?String
+}
+
+enum SpiritType {
+    WINE
+    BEER
+    LIQUEUR
+    LIQUOR
+}
+
+type Spirit {
+    name: String
+    typeOf: SpiritType
+    previewImage: URL
+    brand: ?String
+    percentAlcohol: Float
+    msrp: CurrencyUSD
+    description: ?String
+}
+
+type Herb {
+    name: String
+    previewImage: URL
+    msrp: CurrencyUSD
+    description: ?String
 }
 
 type Recipe() {
     name: String
     previewImage: URL
-    items: [Beverage]
+    ingredients: [Ingredient]
     author: User
 }
