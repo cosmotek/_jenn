@@ -54,9 +54,9 @@ func (p *Parser) Parse() (ir.ModelIR, error) {
 			err = p.ParseEnumBlock()
 			break
 
-		case lexer.UNION:
-			err = p.ParseUnionBlock()
-			break
+		// case lexer.UNION:
+		// 	err = p.ParseUnionBlock()
+		// 	break
 
 		case lexer.ANNOTATION:
 			err = p.ParseAnnotation()
